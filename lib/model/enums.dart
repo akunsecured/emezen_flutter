@@ -1,0 +1,3 @@
+enum AuthMethod {
+  login, register
+}

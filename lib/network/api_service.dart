@@ -23,4 +23,17 @@ class ApiService {
     }
     return null;
   }
+
+  Future<String?> login(UserCredentials userCredentials) async {
+    try {
+      final response =
+          await dio.post('/auth/login', data: userCredentials.toJson());
+      if (response.statusCode == 200) {
+        return response.data.toString();
+      }
+    } on DioError catch (e) {
+      print(e.message);
+    }
+    return null;
+  }
 }

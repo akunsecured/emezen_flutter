@@ -1,3 +1,4 @@
+import 'package:emezen/model/enums.dart';
 import 'package:emezen/widgets/search_bar.dart';
 import 'package:flutter/material.dart';
 
@@ -26,14 +27,16 @@ class _HomeScreenState extends State<HomeScreen> {
                   title: const Text("Login",
                       style: TextStyle(color: Colors.white)),
                   onTap: () {
-                    Navigator.pushNamed(context, '/login');
+                    Navigator.pushNamed(context, '/auth',
+                        arguments: AuthMethod.login);
                   }),
               ListTile(
                   leading: const Icon(Icons.person),
                   title: const Text("Register",
                       style: TextStyle(color: Colors.white)),
                   onTap: () {
-                    Navigator.pushNamed(context, '/register');
+                    Navigator.pushNamed(context, '/auth',
+                        arguments: AuthMethod.register);
                   }),
             ],
           ),
