@@ -1,5 +1,6 @@
 import 'package:emezen/pages/home_screen.dart';
 import 'package:emezen/pages/not_found_screen.dart';
+import 'package:emezen/pages/register_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:url_strategy/url_strategy.dart';
 
@@ -16,7 +17,7 @@ class EmezenApp extends StatelessWidget {
     return MaterialApp(
       title: 'Emezen',
       theme: ThemeData(
-          primarySwatch: Colors.blue,
+          primarySwatch: Colors.orange,
           appBarTheme:
               AppBarTheme(color: Colors.blueGrey.shade900, centerTitle: true)),
       initialRoute: '/',
@@ -24,6 +25,8 @@ class EmezenApp extends StatelessWidget {
         switch (settings.name) {
           case '/':
             return MaterialPageRoute(builder: (context) => const HomeScreen());
+          case '/register':
+            return MaterialPageRoute(builder: (context) => const RegisterScreen());
           default:
             return MaterialPageRoute(
                 builder: (context) => const NotFoundScreen());
