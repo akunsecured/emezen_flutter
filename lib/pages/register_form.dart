@@ -3,6 +3,7 @@ import 'package:emezen/model/user.dart';
 import 'package:emezen/network/api_service.dart';
 import 'package:emezen/provider/auth_provider.dart';
 import 'package:emezen/widgets/bordered_text_field.dart';
+import 'package:emezen/widgets/loading_support_button.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -73,13 +74,9 @@ class _RegisterFormState extends State<RegisterForm> {
                 AuthProvider(Provider.of<ApiService>(context, listen: false)),
             builder: (context, child) => Selector<AuthProvider, bool>(
               selector: (_, authProvider) => authProvider.isLoading,
-              builder: (_, isLoading, __) => ElevatedButton(
-                child: isLoading
-                    ? const SizedBox(
-                        height: 24,
-                        width: 24,
-                        child: CircularProgressIndicator())
-                    : const Text('Register'),
+              builder: (_, isLoading, __) => LoadingSupportButton(
+                isLoading: isLoading,
+                text: 'Register',
                 onPressed: () async {
                   bool success =
                       await Provider.of<AuthProvider>(context, listen: false)

@@ -3,6 +3,7 @@ import 'package:emezen/model/user.dart';
 import 'package:emezen/network/api_service.dart';
 import 'package:emezen/provider/auth_provider.dart';
 import 'package:emezen/widgets/bordered_text_field.dart';
+import 'package:emezen/widgets/loading_support_button.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -43,32 +44,30 @@ class _LoginFormState extends State<LoginForm> {
         BorderedTextField(
             _passwordController, 'Password', TextInputType.visiblePassword),
         Container(
-            margin: const EdgeInsets.only(top: 32, bottom: 16),
-            child: ChangeNotifierProvider(
+          width: double.infinity,
+          margin:
+              const EdgeInsets.only(top: 32, bottom: 16, left: 12, right: 12),
+          child: ChangeNotifierProvider(
               create: (_) =>
                   AuthProvider(Provider.of<ApiService>(context, listen: false)),
               builder: (context, child) => Selector<AuthProvider, bool>(
-                selector: (_, authProvider) => authProvider.isLoading,
-                builder: (_, isLoading, __) => ElevatedButton(
-                  child: isLoading
-                      ? const SizedBox(
-                          height: 24,
-                          width: 24,
-                          child: CircularProgressIndicator())
-                      : const Text('Sign in'),
-                  onPressed: () async {
-                    bool success =
-                        await Provider.of<AuthProvider>(context, listen: false)
-                            .submit(UserWrapper(
-                                userCredentials: UserCredentials(
-                                    email: _emailController.text,
-                                    password: _passwordController.text),
-                                type: UserWrapperType.credentials));
-                    if (success) _navigateBack();
-                  },
-                ),
-              ),
-            ))
+                    selector: (_, authProvider) => authProvider.isLoading,
+                    builder: (_, isLoading, __) => LoadingSupportButton(
+                        isLoading: isLoading,
+                        text: 'Login',
+                        onPressed: () async {
+                          bool success = await Provider.of<AuthProvider>(
+                                  context,
+                                  listen: false)
+                              .submit(UserWrapper(
+                                  userCredentials: UserCredentials(
+                                      email: _emailController.text,
+                                      password: _passwordController.text),
+                                  type: UserWrapperType.credentials));
+                          if (success) _navigateBack();
+                        }),
+                  )),
+        ),
       ],
     );
   }
