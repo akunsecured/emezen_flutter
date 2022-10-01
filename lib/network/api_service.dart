@@ -5,10 +5,6 @@ import 'package:emezen/util/errors.dart';
 class ApiService {
   Dio dio = Dio(BaseOptions(
     baseUrl: 'http://localhost:8080/api/v1',
-    headers: {
-      'content-type': 'application/json',
-      'Access-Control-Allow-Origin': 'true'
-    },
   ));
 
   Future<String?> register(UserWrapper userWrapper) async {
