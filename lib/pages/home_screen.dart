@@ -17,6 +17,7 @@ class _HomeScreenState extends State<HomeScreen> {
             child: const SearchBar(),
           ),
           centerTitle: true,
+          iconTheme: const IconThemeData(color: Colors.white),
         ),
         drawer: Drawer(
           backgroundColor: Colors.blueGrey.shade700,
