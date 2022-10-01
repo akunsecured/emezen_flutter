@@ -1,3 +1,5 @@
+import './enums.dart';
+
 class User {
   final String? id;
   final String firstName;
@@ -52,17 +54,38 @@ class UserCredentials {
           password: json['password']);
 }
 
-class UserDataWithCredentials {
-  final User user;
-  final UserCredentials userCredentials;
+class UserWrapper {
+  final User? user;
+  final UserCredentials? userCredentials;
+  final UserWrapperType type;
 
-  UserDataWithCredentials({required this.user, required this.userCredentials});
+  UserWrapper({this.user, this.userCredentials, required this.type});
 
   Map<String, dynamic> toJson() =>
-      {'user_data': user.toJson(), 'credentials': userCredentials.toJson()};
+      {'user_data': user?.toJson(), 'credentials': userCredentials?.toJson()};
 
-  factory UserDataWithCredentials.fromJson(Map<String, dynamic> json) =>
-      UserDataWithCredentials(
-          user: User.fromJson(json['user_data']),
-          userCredentials: UserCredentials.fromJson(json['credentials']));
+  factory UserWrapper.fromJson(Map<String, dynamic> json) {
+    User? user;
+    if (json['user_data'] != null) {
+      user = User.fromJson(json['user_data']);
+    }
+
+    UserCredentials? userCredentials;
+    if (json['credentials'] != null) {
+      userCredentials = UserCredentials.fromJson(json['credentials']);
+    }
+
+    late UserWrapperType type;
+
+    if (user == null && userCredentials != null) {
+      type = UserWrapperType.credentials;
+    } else if (user != null && userCredentials == null) {
+      type = UserWrapperType.userData;
+    } else {
+      type = UserWrapperType.userDataWithCredentials;
+    }
+
+    return UserWrapper(
+        user: user, userCredentials: userCredentials, type: type);
+  }
 }

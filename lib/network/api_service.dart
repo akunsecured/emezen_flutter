@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:emezen/model/user.dart';
+import 'package:emezen/util/errors.dart';
 
 class ApiService {
   Dio dio = Dio(BaseOptions(
@@ -10,18 +11,25 @@ class ApiService {
     },
   ));
 
-  Future<String?> register(
-      UserDataWithCredentials userDataWithCredentials) async {
+  Future<String?> register(UserWrapper userWrapper) async {
     try {
-      final response = await dio.post('/auth/register',
-          data: userDataWithCredentials.toJson());
+      final response =
+          await dio.post('/auth/register', data: userWrapper.toJson());
       if (response.statusCode == 200) {
         return response.data.toString();
       }
+      return null;
     } on DioError catch (e) {
       print(e.message);
+
+      var errorResponse = e.response;
+      if (errorResponse != null) {
+        throw ApiError(
+            message: e.response!.data['message'], statusCode: e.response!.statusCode!);
+      } else {
+        throw ApiError(message: 'Unknown ApiError');
+      }
     }
-    return null;
   }
 
   Future<String?> login(UserCredentials userCredentials) async {
@@ -29,11 +37,19 @@ class ApiService {
       final response =
           await dio.post('/auth/login', data: userCredentials.toJson());
       if (response.statusCode == 200) {
-        return response.data.toString();
+        return response.data['message'];
       }
+      return null;
     } on DioError catch (e) {
       print(e.message);
+
+      var errorResponse = e.response;
+      if (errorResponse != null) {
+        throw ApiError(
+            message: e.response!.data['message'], statusCode: e.response!.statusCode!);
+      } else {
+        throw ApiError(message: 'Unknown ApiError');
+      }
     }
-    return null;
   }
 }

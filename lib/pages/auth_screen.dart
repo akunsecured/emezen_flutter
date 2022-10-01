@@ -1,5 +1,4 @@
 import 'package:emezen/model/enums.dart';
-import 'package:emezen/network/api_service.dart';
 import 'package:emezen/pages/login_form.dart';
 import 'package:emezen/pages/register_form.dart';
 import 'package:flutter/material.dart';
@@ -14,15 +13,6 @@ class AuthScreen extends StatefulWidget {
 }
 
 class _AuthScreenState extends State<AuthScreen> {
-  late ApiService _apiService;
-
-  @override
-  void initState() {
-    super.initState();
-
-    _apiService = ApiService();
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -44,8 +34,8 @@ class _AuthScreenState extends State<AuthScreen> {
               border: Border.all(color: Colors.black38, width: 2.0),
               borderRadius: const BorderRadius.all(Radius.circular(12))),
           child: widget._authMethod == AuthMethod.login
-              ? LoginForm(_apiService)
-              : RegisterForm(_apiService),
+              ? const LoginForm()
+              : const RegisterForm(),
         ),
       ),
     );
