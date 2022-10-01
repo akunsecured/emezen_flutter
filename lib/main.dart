@@ -1,5 +1,5 @@
 import 'package:emezen/model/enums.dart';
-import 'package:emezen/network/api_service.dart';
+import 'package:emezen/network/auth_service.dart';
 import 'package:emezen/pages/auth_screen.dart';
 import 'package:emezen/pages/home_screen.dart';
 import 'package:emezen/pages/not_found_screen.dart';
@@ -18,8 +18,8 @@ class EmezenApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Provider<ApiService>(
-      create: (_) => ApiService(),
+    return Provider<AuthService>(
+      create: (_) => AuthService(),
       child: MaterialApp(
         title: 'Emezen',
         theme: ThemeData(

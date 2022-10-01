@@ -1,6 +1,6 @@
 import 'package:emezen/model/enums.dart';
 import 'package:emezen/model/user.dart';
-import 'package:emezen/network/api_service.dart';
+import 'package:emezen/network/auth_service.dart';
 import 'package:emezen/provider/auth_provider.dart';
 import 'package:emezen/widgets/bordered_text_field.dart';
 import 'package:emezen/widgets/loading_support_button.dart';
@@ -71,7 +71,7 @@ class _RegisterFormState extends State<RegisterForm> {
           margin: const EdgeInsets.only(top: 32, bottom: 16),
           child: ChangeNotifierProvider(
             create: (_) =>
-                AuthProvider(Provider.of<ApiService>(context, listen: false)),
+                AuthProvider(Provider.of<AuthService>(context, listen: false)),
             builder: (context, child) => Selector<AuthProvider, bool>(
               selector: (_, authProvider) => authProvider.isLoading,
               builder: (_, isLoading, __) => LoadingSupportButton(
