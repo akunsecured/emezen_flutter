@@ -3,6 +3,7 @@ import 'package:emezen/network/api_service.dart';
 import 'package:emezen/pages/auth_screen.dart';
 import 'package:emezen/pages/home_screen.dart';
 import 'package:emezen/pages/not_found_screen.dart';
+import 'package:emezen/style/app_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:url_strategy/url_strategy.dart';
@@ -22,9 +23,9 @@ class EmezenApp extends StatelessWidget {
       child: MaterialApp(
         title: 'Emezen',
         theme: ThemeData(
-            primarySwatch: Colors.orange,
-            appBarTheme: AppBarTheme(
-                color: Colors.blueGrey.shade900, centerTitle: true)),
+            primarySwatch: AppTheme.primarySwatch,
+            appBarTheme:
+                AppBarTheme(color: AppTheme.appBarColor, centerTitle: true)),
         initialRoute: '/',
         onGenerateRoute: (settings) {
           switch (settings.name) {

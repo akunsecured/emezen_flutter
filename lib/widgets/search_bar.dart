@@ -1,3 +1,4 @@
+import 'package:emezen/style/app_theme.dart';
 import 'package:flutter/material.dart';
 
 class SearchBar extends StatefulWidget {
@@ -17,18 +18,21 @@ class _SearchBarState extends State<SearchBar> {
       child: TextFormField(
         textAlignVertical: TextAlignVertical.center,
         decoration: InputDecoration(
-            fillColor: Colors.white,
+            fillColor: AppTheme.appBarSecondaryColor,
             filled: true,
             border: OutlineInputBorder(borderRadius: BorderRadius.circular(30)),
             suffixIcon: Container(
               height: AppBar().preferredSize.height,
               decoration: const BoxDecoration(
-                  color: Colors.orange,
+                  color: AppTheme.primarySwatch,
                   borderRadius: BorderRadius.only(
                       topRight: Radius.circular(12),
                       bottomRight: Radius.circular(12))),
               child: IconButton(
-                icon: const Icon(Icons.search),
+                icon: Icon(
+                  Icons.search,
+                  color: AppTheme.appBarColor,
+                ),
                 onPressed: () {},
               ),
             )),

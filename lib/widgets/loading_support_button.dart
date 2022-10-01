@@ -1,3 +1,4 @@
+import 'package:emezen/style/app_theme.dart';
 import 'package:flutter/material.dart';
 
 class LoadingSupportButton extends StatelessWidget {
@@ -27,7 +28,8 @@ class LoadingSupportButton extends StatelessWidget {
                 height: 20,
                 width: 20,
                 child: CircularProgressIndicator(
-                    color: progressIndicatorColor ?? Colors.black))
+                    color: progressIndicatorColor ??
+                        AppTheme.progressIndicatorInButtonColor))
             : const Text('Sign in'),
       );
 }

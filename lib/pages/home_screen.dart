@@ -1,4 +1,5 @@
 import 'package:emezen/model/enums.dart';
+import 'package:emezen/style/app_theme.dart';
 import 'package:emezen/widgets/search_bar.dart';
 import 'package:flutter/material.dart';
 
@@ -17,16 +18,16 @@ class _HomeScreenState extends State<HomeScreen> {
             child: const SearchBar(),
           ),
           centerTitle: true,
-          iconTheme: const IconThemeData(color: Colors.white),
+          iconTheme: const IconThemeData(color: AppTheme.appBarSecondaryColor),
         ),
         drawer: Drawer(
-          backgroundColor: Colors.blueGrey.shade700,
+          backgroundColor: AppTheme.drawerBackgroundColor,
           child: ListView(
             children: [
               ListTile(
                   leading: const Icon(Icons.key),
                   title: const Text("Login",
-                      style: TextStyle(color: Colors.white)),
+                      style: TextStyle(color: AppTheme.drawerListTileColor)),
                   onTap: () {
                     Navigator.pushNamed(context, '/auth',
                         arguments: AuthMethod.login);
@@ -34,7 +35,7 @@ class _HomeScreenState extends State<HomeScreen> {
               ListTile(
                   leading: const Icon(Icons.person),
                   title: const Text("Register",
-                      style: TextStyle(color: Colors.white)),
+                      style: TextStyle(color: AppTheme.drawerListTileColor)),
                   onTap: () {
                     Navigator.pushNamed(context, '/auth',
                         arguments: AuthMethod.register);
@@ -46,7 +47,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Widget _desktopScaffold() => Scaffold(
         appBar: AppBar(
-          backgroundColor: Colors.blueGrey.shade900,
+          backgroundColor: AppTheme.appBarColor,
           title: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
