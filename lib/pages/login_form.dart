@@ -48,8 +48,8 @@ class _LoginFormState extends State<LoginForm> {
           margin:
               const EdgeInsets.only(top: 32, bottom: 16, left: 12, right: 12),
           child: ChangeNotifierProvider(
-              create: (_) =>
-                  AuthProvider(Provider.of<AuthService>(context, listen: false)),
+              create: (_) => AuthProvider(
+                  Provider.of<AuthService>(context, listen: false)),
               builder: (context, child) => Selector<AuthProvider, bool>(
                     selector: (_, authProvider) => authProvider.isLoading,
                     builder: (_, isLoading, __) => LoadingSupportButton(
@@ -68,6 +68,34 @@ class _LoginFormState extends State<LoginForm> {
                         }),
                   )),
         ),
+        Container(
+          margin: const EdgeInsets.symmetric(horizontal: 16),
+          child: Stack(
+            children: [
+              const Divider(),
+              Center(
+                  child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 12),
+                color: Colors.white,
+                child: const Text(
+                  'New to Emezon?',
+                ),
+              ))
+            ],
+          ),
+        ),
+        Container(
+          width: double.infinity,
+          margin: const EdgeInsets.symmetric(vertical: 16, horizontal: 12),
+          child: ElevatedButton(
+            style: ElevatedButton.styleFrom(primary: Colors.grey.shade200),
+            onPressed: () {
+              Navigator.pushReplacementNamed(context, '/auth',
+                  arguments: AuthMethod.register);
+            },
+            child: const Text('Register'),
+          ),
+        )
       ],
     );
   }

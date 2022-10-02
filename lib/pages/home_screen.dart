@@ -1,5 +1,6 @@
 import 'package:emezen/model/enums.dart';
 import 'package:emezen/style/app_theme.dart';
+import 'package:emezen/widgets/drawer_list_tile.dart';
 import 'package:emezen/widgets/search_bar.dart';
 import 'package:flutter/material.dart';
 
@@ -24,18 +25,24 @@ class _HomeScreenState extends State<HomeScreen> {
           backgroundColor: AppTheme.drawerBackgroundColor,
           child: ListView(
             children: [
-              ListTile(
-                  leading: const Icon(Icons.key),
-                  title: const Text("Login",
-                      style: TextStyle(color: AppTheme.drawerListTileColor)),
-                  onTap: () {
-                    Navigator.pushNamed(context, '/auth',
-                        arguments: AuthMethod.login);
-                  }),
-              ListTile(
-                  leading: const Icon(Icons.person),
-                  title: const Text("Register",
-                      style: TextStyle(color: AppTheme.drawerListTileColor)),
+              Container(
+                height: AppBar().preferredSize.height,
+                padding: const EdgeInsets.all(12),
+                child: const Image(
+                  image: AssetImage('assets/images/emezen-logo.png'),
+                ),
+              ),
+              DrawerListTile(
+                iconData: Icons.key,
+                text: 'Login',
+                onTap: () {
+                  Navigator.pushNamed(context, '/auth',
+                      arguments: AuthMethod.login);
+                },
+              ),
+              DrawerListTile(
+                  iconData: Icons.person,
+                  text: 'Register',
                   onTap: () {
                     Navigator.pushNamed(context, '/auth',
                         arguments: AuthMethod.register);
