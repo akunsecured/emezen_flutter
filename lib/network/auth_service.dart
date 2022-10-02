@@ -35,10 +35,10 @@ class AuthService extends ApiService {
       if (response.statusCode == 200) {
         return response.data.toString();
       }
-      return null;
     } on DioError catch (e) {
       _handleNetworkError(e);
     }
+    return null;
   }
 
   Future<String?> login(UserCredentials userCredentials) async {
@@ -47,9 +47,9 @@ class AuthService extends ApiService {
       if (response.statusCode == 200) {
         return response.data['message'];
       }
-      return null;
     } on DioError catch (e) {
       _handleNetworkError(e);
     }
+    return null;
   }
 }
