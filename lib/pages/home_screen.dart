@@ -1,8 +1,8 @@
-import 'package:emezen/model/enums.dart';
 import 'package:emezen/style/app_theme.dart';
 import 'package:emezen/widgets/drawer_list_tile.dart';
 import 'package:emezen/widgets/search_bar.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({Key? key}) : super(key: key);
@@ -35,18 +35,12 @@ class _HomeScreenState extends State<HomeScreen> {
               DrawerListTile(
                 iconData: Icons.key,
                 text: 'Login',
-                onTap: () {
-                  Navigator.pushNamed(context, '/auth',
-                      arguments: AuthMethod.login);
-                },
+                onTap: () => context.go('/login'),
               ),
               DrawerListTile(
                   iconData: Icons.person,
                   text: 'Register',
-                  onTap: () {
-                    Navigator.pushNamed(context, '/auth',
-                        arguments: AuthMethod.register);
-                  }),
+                  onTap: () => context.go('/register')),
             ],
           ),
         ),

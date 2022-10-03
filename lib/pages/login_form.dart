@@ -5,6 +5,7 @@ import 'package:emezen/provider/auth_provider.dart';
 import 'package:emezen/widgets/bordered_text_field.dart';
 import 'package:emezen/widgets/loading_support_button.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
 class LoginForm extends StatefulWidget {
@@ -25,7 +26,7 @@ class _LoginFormState extends State<LoginForm> {
     _passwordController = TextEditingController();
   }
 
-  void _navigateBack() => Navigator.pop(context);
+  void _navigateBack() => context.goNamed('home');
 
   @override
   Widget build(BuildContext context) {
@@ -90,8 +91,7 @@ class _LoginFormState extends State<LoginForm> {
           child: ElevatedButton(
             style: ElevatedButton.styleFrom(primary: Colors.grey.shade200),
             onPressed: () {
-              Navigator.pushReplacementNamed(context, '/auth',
-                  arguments: AuthMethod.register);
+              context.goNamed('register');
             },
             child: const Text('Register'),
           ),

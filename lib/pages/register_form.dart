@@ -5,6 +5,7 @@ import 'package:emezen/provider/auth_provider.dart';
 import 'package:emezen/widgets/bordered_text_field.dart';
 import 'package:emezen/widgets/loading_support_button.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
 class RegisterForm extends StatefulWidget {
@@ -33,7 +34,7 @@ class _RegisterFormState extends State<RegisterForm> {
     _confirmPasswordController = TextEditingController();
   }
 
-  void _navigateBack() => Navigator.pop(context);
+  void _navigateBack() => context.goNamed('home');
 
   @override
   Widget build(BuildContext context) {
