@@ -1,6 +1,5 @@
 import 'package:emezen/model/enums.dart';
 import 'package:emezen/model/user.dart';
-import 'package:emezen/network/auth_service.dart';
 import 'package:emezen/provider/auth_provider.dart';
 import 'package:emezen/widgets/bordered_text_field.dart';
 import 'package:emezen/widgets/loading_support_button.dart';
@@ -9,7 +8,9 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
 class RegisterForm extends StatefulWidget {
-  const RegisterForm({Key? key}) : super(key: key);
+  final Object? extras;
+
+  const RegisterForm({Key? key, this.extras}) : super(key: key);
 
   @override
   State<RegisterForm> createState() => _RegisterFormState();
@@ -23,18 +24,36 @@ class _RegisterFormState extends State<RegisterForm> {
       _passwordController,
       _confirmPasswordController;
 
+  late final Map<String, dynamic> _args;
+
   @override
   void initState() {
     super.initState();
+    if (widget.extras != null) {
+      _args = widget.extras as Map<String, dynamic>;
+    } else {
+      _args = {};
+    }
+
     _firstNameController = TextEditingController();
     _lastNameController = TextEditingController();
     _ageController = TextEditingController();
     _emailController = TextEditingController();
     _passwordController = TextEditingController();
     _confirmPasswordController = TextEditingController();
+
+    print(Provider.of<AuthProvider>(context, listen: false).ping);
   }
 
-  void _navigateBack() => context.goNamed('home');
+  void _navigateBack() {
+    if (_args.isNotEmpty) {
+      if (_args['fromHome'] != null && _args['fromHome']) {
+        context.pop();
+        return;
+      }
+    }
+    context.goNamed('home');
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -70,10 +89,9 @@ class _RegisterFormState extends State<RegisterForm> {
             TextInputType.visiblePassword),
         Container(
           margin: const EdgeInsets.only(top: 32, bottom: 16),
-          child: ChangeNotifierProvider(
-            create: (_) =>
-                AuthProvider(Provider.of<AuthService>(context, listen: false)),
-            builder: (context, child) => Selector<AuthProvider, bool>(
+          child: Consumer<AuthProvider>(
+            builder: (context, authProvider, child) =>
+                Selector<AuthProvider, bool>(
               selector: (_, authProvider) => authProvider.isLoading,
               builder: (_, isLoading, __) => LoadingSupportButton(
                 isLoading: isLoading,

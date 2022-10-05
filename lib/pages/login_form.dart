@@ -1,6 +1,5 @@
 import 'package:emezen/model/enums.dart';
 import 'package:emezen/model/user.dart';
-import 'package:emezen/network/auth_service.dart';
 import 'package:emezen/provider/auth_provider.dart';
 import 'package:emezen/widgets/bordered_text_field.dart';
 import 'package:emezen/widgets/loading_support_button.dart';
@@ -9,7 +8,9 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
 class LoginForm extends StatefulWidget {
-  const LoginForm({Key? key}) : super(key: key);
+  final Object? extras;
+
+  const LoginForm({Key? key, this.extras}) : super(key: key);
 
   @override
   State<LoginForm> createState() => _LoginFormState();
@@ -17,16 +18,31 @@ class LoginForm extends StatefulWidget {
 
 class _LoginFormState extends State<LoginForm> {
   late TextEditingController _emailController, _passwordController;
+  late final Map<String, dynamic> _args;
 
   @override
   void initState() {
     super.initState();
+    print(widget.extras);
+    if (widget.extras != null) {
+      _args = widget.extras as Map<String, dynamic>;
+    } else {
+      _args = {};
+    }
 
     _emailController = TextEditingController();
     _passwordController = TextEditingController();
   }
 
-  void _navigateBack() => context.goNamed('home');
+  void _navigateBack() {
+    if (_args.isNotEmpty) {
+      if (_args['fromHome'] != null && _args['fromHome']) {
+        context.pop();
+        return;
+      }
+    }
+    context.goNamed('home');
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -48,10 +64,9 @@ class _LoginFormState extends State<LoginForm> {
           width: double.infinity,
           margin:
               const EdgeInsets.only(top: 32, bottom: 16, left: 12, right: 12),
-          child: ChangeNotifierProvider(
-              create: (_) => AuthProvider(
-                  Provider.of<AuthService>(context, listen: false)),
-              builder: (context, child) => Selector<AuthProvider, bool>(
+          child: Consumer<AuthProvider>(
+              builder: (context, authProvider, child) =>
+                  Selector<AuthProvider, bool>(
                     selector: (_, authProvider) => authProvider.isLoading,
                     builder: (_, isLoading, __) => LoadingSupportButton(
                         isLoading: isLoading,

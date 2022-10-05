@@ -5,12 +5,14 @@ class DrawerListTile extends StatelessWidget {
   final IconData iconData;
   final String text;
   final Function() onTap;
+  final bool? enabled;
 
   const DrawerListTile(
       {Key? key,
       required this.iconData,
       required this.text,
-      required this.onTap})
+      required this.onTap,
+      this.enabled})
       : super(key: key);
 
   @override
@@ -22,5 +24,6 @@ class DrawerListTile extends StatelessWidget {
         title: Text(text,
             style: const TextStyle(color: AppTheme.drawerListTileColor)),
         onTap: onTap,
+        enabled: enabled ?? true,
       );
 }

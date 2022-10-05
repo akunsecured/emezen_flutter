@@ -5,14 +5,27 @@ import 'package:flutter/material.dart';
 
 class AuthScreen extends StatefulWidget {
   final AuthMethod _authMethod;
+  final Object? extras;
 
-  const AuthScreen(this._authMethod, {Key? key}) : super(key: key);
+  const AuthScreen(this._authMethod, {Key? key, this.extras}) : super(key: key);
 
   @override
   State<AuthScreen> createState() => _AuthScreenState();
 }
 
 class _AuthScreenState extends State<AuthScreen> {
+  late final Map<String, dynamic> _args;
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.extras != null) {
+      _args = widget.extras as Map<String, dynamic>;
+    } else {
+      _args = {};
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
