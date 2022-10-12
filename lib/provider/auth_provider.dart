@@ -2,6 +2,7 @@ import 'package:emezen/model/enums.dart';
 import 'package:emezen/model/user.dart';
 import 'package:emezen/model/wrapped_token.dart';
 import 'package:emezen/network/auth_service.dart';
+import 'package:emezen/network/user_service.dart';
 import 'package:emezen/util/errors.dart';
 import 'package:flutter/foundation.dart';
 import 'package:fluttertoast/fluttertoast.dart';
@@ -10,6 +11,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 class AuthProvider with ChangeNotifier {
   late final AuthService _authService;
+  late final UserService _userService;
   late final SharedPreferences _sharedPreferences;
 
   bool _isDisposed = false;
@@ -21,8 +23,10 @@ class AuthProvider with ChangeNotifier {
 
   AuthProvider(
       {required AuthService authService,
+      required UserService userService,
       required SharedPreferences sharedPreferences}) {
     _authService = authService;
+    _userService = userService;
     _sharedPreferences = sharedPreferences;
   }
 
@@ -139,6 +143,23 @@ class AuthProvider with ChangeNotifier {
     await _removeRefreshToken();
 
     _changeLoadingStatus();
+  }
+
+  Future<User?> getUser(String id) async {
+    _changeLoadingStatus();
+
+    try {
+      String? token = await getAccessToken();
+      if (await isLoggedIn(accessToken: token)) {
+        return await _userService.getUser(id: id, token: token!);
+      }
+    } on ApiError catch (e) {
+      print(e);
+      Fluttertoast.showToast(msg: "Error: ${e.message}");
+    }
+
+    _changeLoadingStatus();
+    return null;
   }
 
   @override

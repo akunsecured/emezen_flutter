@@ -1,4 +1,5 @@
 import 'package:emezen/network/auth_service.dart';
+import 'package:emezen/network/user_service.dart';
 import 'package:emezen/provider/auth_provider.dart';
 import 'package:emezen/router/app_router.dart';
 import 'package:emezen/style/app_theme.dart';
@@ -30,14 +31,18 @@ class EmezenApp extends StatefulWidget {
 
 class _EmezenAppState extends State<EmezenApp> {
   late final AuthService _authService;
+  late final UserService _userService;
   late final AuthProvider _authProvider;
 
   @override
   void initState() {
     super.initState();
     _authService = AuthService();
+    _userService = UserService();
     _authProvider = AuthProvider(
-        authService: _authService, sharedPreferences: widget.sharedPreferences);
+        authService: _authService,
+        userService: _userService,
+        sharedPreferences: widget.sharedPreferences);
   }
 
   Future<String?> _getCurrentAccessToken() async {
@@ -61,6 +66,7 @@ class _EmezenAppState extends State<EmezenApp> {
         return MultiProvider(
           providers: [
             Provider<AuthService>(create: (_) => _authService),
+            Provider<UserService>(create: (_) => _userService),
             ChangeNotifierProvider<AuthProvider>(create: (_) => _authProvider),
             Provider(
                 create: (_) => AppRouter(
