@@ -1,4 +1,4 @@
-import 'package:emezen/model/enums.dart' as enums;
+import 'package:emezen/model/enums.dart';
 import 'package:emezen/model/page_with_args.dart';
 import 'package:emezen/model/user.dart';
 import 'package:emezen/pages/home_page.dart';
@@ -6,7 +6,7 @@ import 'package:emezen/pages/not_found_page.dart';
 import 'package:emezen/pages/error_page.dart';
 import 'package:emezen/pages/profile_page.dart';
 import 'package:emezen/provider/auth_provider.dart';
-import 'package:emezen/provider/page_provider.dart';
+import 'package:emezen/provider/main_page_provider.dart';
 import 'package:emezen/style/app_theme.dart';
 import 'package:emezen/util/constants.dart';
 import 'package:emezen/widgets/drawer_list_tile.dart';
@@ -24,27 +24,27 @@ class AppScreen extends StatefulWidget {
 }
 
 class _AppScreenState extends State<AppScreen> {
-  late final PageProvider _pageProvider;
+  late final MainPageProvider _mainPageProvider;
   late final GlobalKey<ScaffoldState> _scaffoldKey;
   late User currentUser;
 
   @override
   void initState() {
     super.initState();
-    _pageProvider = Provider.of<PageProvider>(context, listen: false);
+    _mainPageProvider = Provider.of<MainPageProvider>(context, listen: false);
     _scaffoldKey = GlobalKey<ScaffoldState>();
     currentUser = widget.user;
   }
 
-  Widget _getBody() => Consumer<PageProvider>(
+  Widget _getBody() => Consumer<MainPageProvider>(
       builder: (context, pageProvider, child) =>
-          Selector<PageProvider, PageWithArgs>(
+          Selector<MainPageProvider, PageWithArgs>(
               selector: (_, pageProvider) => pageProvider.actualPage,
               builder: (_, actualPage, __) {
                 switch (actualPage.page) {
-                  case enums.Page.home:
+                  case MainPages.home:
                     return const HomePage();
-                  case enums.Page.profile:
+                  case MainPages.profile:
                     {
                       if (actualPage.args.isEmpty ||
                           actualPage.args['id'] == null) {
@@ -58,12 +58,12 @@ class _AppScreenState extends State<AppScreen> {
                 }
               }));
 
-  void _navigate(enums.Page destination,
+  void _navigate(MainPages destination,
       {Map<String, dynamic> args = const {}}) {
-    _pageProvider.changePage(destination, args: args);
+    _mainPageProvider.changePage(destination, args: args);
   }
 
-  void _navigateAndCloseDrawer(enums.Page destination,
+  void _navigateAndCloseDrawer(MainPages destination,
       {Map<String, dynamic> args = const {}}) {
     _navigate(destination, args: args);
     if (_scaffoldKey.currentState != null) {
@@ -110,7 +110,7 @@ class _AppScreenState extends State<AppScreen> {
                     width: 24,
                   ),
                   text: _getHelloText(),
-                  onTap: () => _navigateAndCloseDrawer(enums.Page.profile,
+                  onTap: () => _navigateAndCloseDrawer(MainPages.profile,
                       args: {'id': currentUser.id!}),
                 ),
               ),
@@ -118,7 +118,7 @@ class _AppScreenState extends State<AppScreen> {
               DrawerListTile(
                 iconData: Icons.home,
                 text: 'Home',
-                onTap: () => _navigateAndCloseDrawer(enums.Page.home),
+                onTap: () => _navigateAndCloseDrawer(MainPages.home),
               ),
               Expanded(
                 child: Align(
@@ -141,12 +141,12 @@ class _AppScreenState extends State<AppScreen> {
   List<PopupMenuItem> _getPopupMenuItems() => [
         PopupMenuItem(
           child: const Text('Home'),
-          onTap: () => _navigate(enums.Page.home),
+          onTap: () => _navigate(MainPages.home),
         ),
         PopupMenuItem(
             child: const Text('Profile'),
             onTap: () =>
-                _navigate(enums.Page.profile, args: {'id': currentUser.id!})),
+                _navigate(MainPages.profile, args: {'id': currentUser.id!})),
         PopupMenuItem(child: const Text('Logout'), onTap: () => _logout())
       ];
 

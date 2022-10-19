@@ -6,6 +6,6 @@ enum UserWrapperType {
   userData, credentials, userDataWithCredentials
 }
 
-enum Page {
+enum MainPages {
   home, profile,
 }
