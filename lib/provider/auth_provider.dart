@@ -144,7 +144,7 @@ class AuthProvider with ChangeNotifier {
         return null;
       }
 
-      accessToken = await _refreshAccessToken(accessToken);
+      accessToken = await _refreshAccessToken(refreshToken);
     }
 
     _currentUser = User.fromJson(JwtToken.payload(accessToken!)['user']);
