@@ -4,13 +4,10 @@ import 'package:emezen/provider/auth_provider.dart';
 import 'package:emezen/widgets/bordered_text_field.dart';
 import 'package:emezen/widgets/loading_support_button.dart';
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
 class RegisterForm extends StatefulWidget {
-  final Object? extras;
-
-  const RegisterForm({Key? key, this.extras}) : super(key: key);
+  const RegisterForm({Key? key}) : super(key: key);
 
   @override
   State<RegisterForm> createState() => _RegisterFormState();
@@ -24,16 +21,9 @@ class _RegisterFormState extends State<RegisterForm> {
       _passwordController,
       _confirmPasswordController;
 
-  late final Map<String, dynamic> _args;
-
   @override
   void initState() {
     super.initState();
-    if (widget.extras != null) {
-      _args = widget.extras as Map<String, dynamic>;
-    } else {
-      _args = {};
-    }
 
     _firstNameController = TextEditingController();
     _lastNameController = TextEditingController();
@@ -45,15 +35,7 @@ class _RegisterFormState extends State<RegisterForm> {
     print(Provider.of<AuthProvider>(context, listen: false).ping);
   }
 
-  void _navigateBack() {
-    if (_args.isNotEmpty) {
-      if (_args['fromHome'] != null && _args['fromHome']) {
-        context.pop();
-        return;
-      }
-    }
-    context.goNamed('home');
-  }
+  void _navigateBack() {}
 
   @override
   Widget build(BuildContext context) {
@@ -84,11 +66,21 @@ class _RegisterFormState extends State<RegisterForm> {
         BorderedTextField(
             _emailController, 'Email address', TextInputType.emailAddress),
         BorderedTextField(
-            _passwordController, 'Password', TextInputType.visiblePassword),
-        BorderedTextField(_confirmPasswordController, 'Confirm password',
-            TextInputType.visiblePassword),
+          _passwordController,
+          'Password',
+          TextInputType.visiblePassword,
+          passwordText: true,
+        ),
+        BorderedTextField(
+          _confirmPasswordController,
+          'Confirm password',
+          TextInputType.visiblePassword,
+          passwordText: true,
+        ),
         Container(
-          margin: const EdgeInsets.only(top: 32, bottom: 16),
+          width: double.infinity,
+          margin:
+              const EdgeInsets.only(top: 32, bottom: 16, left: 12, right: 12),
           child: Consumer<AuthProvider>(
             builder: (context, authProvider, child) =>
                 Selector<AuthProvider, bool>(
@@ -112,6 +104,34 @@ class _RegisterFormState extends State<RegisterForm> {
                 },
               ),
             ),
+          ),
+        ),
+        Container(
+          margin: const EdgeInsets.symmetric(horizontal: 16),
+          child: Stack(
+            children: [
+              const Divider(),
+              Center(
+                  child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 12),
+                color: Colors.white,
+                child: const Text(
+                  'Already have an account?',
+                ),
+              ))
+            ],
+          ),
+        ),
+        Container(
+          width: double.infinity,
+          margin: const EdgeInsets.symmetric(vertical: 16, horizontal: 12),
+          child: ElevatedButton(
+            style: ElevatedButton.styleFrom(primary: Colors.grey.shade200),
+            onPressed: () {
+              Provider.of<AuthProvider>(context, listen: false)
+                  .changeAuthMethod(AuthMethod.login);
+            },
+            child: const Text('Sign in'),
           ),
         )
       ],

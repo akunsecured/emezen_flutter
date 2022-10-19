@@ -4,13 +4,10 @@ import 'package:emezen/provider/auth_provider.dart';
 import 'package:emezen/widgets/bordered_text_field.dart';
 import 'package:emezen/widgets/loading_support_button.dart';
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
 class LoginForm extends StatefulWidget {
-  final Object? extras;
-
-  const LoginForm({Key? key, this.extras}) : super(key: key);
+  const LoginForm({Key? key}) : super(key: key);
 
   @override
   State<LoginForm> createState() => _LoginFormState();
@@ -18,31 +15,15 @@ class LoginForm extends StatefulWidget {
 
 class _LoginFormState extends State<LoginForm> {
   late TextEditingController _emailController, _passwordController;
-  late final Map<String, dynamic> _args;
 
   @override
   void initState() {
     super.initState();
-    print(widget.extras);
-    if (widget.extras != null) {
-      _args = widget.extras as Map<String, dynamic>;
-    } else {
-      _args = {};
-    }
-
     _emailController = TextEditingController();
     _passwordController = TextEditingController();
   }
 
-  void _navigateBack() {
-    if (_args.isNotEmpty) {
-      if (_args['fromHome'] != null && _args['fromHome']) {
-        context.pop();
-        return;
-      }
-    }
-    context.goNamed('home');
-  }
+  void _navigateBack() {}
 
   @override
   Widget build(BuildContext context) {
@@ -59,7 +40,11 @@ class _LoginFormState extends State<LoginForm> {
         BorderedTextField(
             _emailController, 'Email address', TextInputType.emailAddress),
         BorderedTextField(
-            _passwordController, 'Password', TextInputType.visiblePassword),
+          _passwordController,
+          'Password',
+          TextInputType.visiblePassword,
+          passwordText: true,
+        ),
         Container(
           width: double.infinity,
           margin:
@@ -106,7 +91,8 @@ class _LoginFormState extends State<LoginForm> {
           child: ElevatedButton(
             style: ElevatedButton.styleFrom(primary: Colors.grey.shade200),
             onPressed: () {
-              context.goNamed('register');
+              Provider.of<AuthProvider>(context, listen: false)
+                  .changeAuthMethod(AuthMethod.register);
             },
             child: const Text('Register'),
           ),

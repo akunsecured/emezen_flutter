@@ -1,11 +1,10 @@
 import 'package:dio/dio.dart';
 import 'package:emezen/network/base_service.dart';
 import 'package:emezen/model/user.dart';
-import 'package:emezen/util/errors.dart';
 
 class UserService extends BaseService {
   UserService() {
-    dio.options.baseUrl = '${dio.options.baseUrl}/users';
+    dio.options.baseUrl = '${dio.options.baseUrl}/user';
   }
 
   Future<User?> getUser({required String id, required String token}) async {
