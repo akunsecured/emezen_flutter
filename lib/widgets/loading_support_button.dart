@@ -30,6 +30,6 @@ class LoadingSupportButton extends StatelessWidget {
                 child: CircularProgressIndicator(
                     color: progressIndicatorColor ??
                         AppTheme.progressIndicatorInButtonColor))
-            : const Text('Sign in'),
+            : Text(text),
       );
 }

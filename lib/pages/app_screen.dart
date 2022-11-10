@@ -2,6 +2,7 @@ import 'package:emezen/model/enums.dart';
 import 'package:emezen/model/page_with_args.dart';
 import 'package:emezen/model/user.dart';
 import 'package:emezen/pages/home_page.dart';
+import 'package:emezen/pages/new_product_page.dart';
 import 'package:emezen/pages/not_found_page.dart';
 import 'package:emezen/pages/error_page.dart';
 import 'package:emezen/pages/profile_page.dart';
@@ -53,6 +54,16 @@ class _AppScreenState extends State<AppScreen> {
                       }
                       return ProfilePage(userId: actualPage.args['id']);
                     }
+                  case MainPages.newProduct:
+                    {
+                      if (actualPage.args.isEmpty ||
+                          actualPage.args['id'] == null) {
+                        return const ErrorPage(
+                            error: "No 'userId' is given as argument");
+                      }
+                      return NewProductPage(userId: actualPage.args['id']);
+                    }
+
                   default:
                     return const NotFoundPage();
                 }
@@ -120,6 +131,12 @@ class _AppScreenState extends State<AppScreen> {
                 text: 'Home',
                 onTap: () => _navigateAndCloseDrawer(MainPages.home),
               ),
+              DrawerListTile(
+                iconData: Icons.add,
+                text: 'New product',
+                onTap: () => _navigateAndCloseDrawer(MainPages.newProduct,
+                    args: {'id': currentUser.id!}),
+              ),
               Expanded(
                 child: Align(
                   alignment: Alignment.bottomCenter,
@@ -147,6 +164,10 @@ class _AppScreenState extends State<AppScreen> {
             child: const Text('Profile'),
             onTap: () =>
                 _navigate(MainPages.profile, args: {'id': currentUser.id!})),
+        PopupMenuItem(
+            child: const Text('New product'),
+            onTap: () =>
+                _navigate(MainPages.newProduct, args: {'id': currentUser.id!})),
         PopupMenuItem(child: const Text('Logout'), onTap: () => _logout())
       ];
 

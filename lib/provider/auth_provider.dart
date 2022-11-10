@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:emezen/model/enums.dart';
 import 'package:emezen/model/user.dart';
@@ -6,6 +7,7 @@ import 'package:emezen/model/wrapped_token.dart';
 import 'package:emezen/network/auth_service.dart';
 import 'package:emezen/network/user_service.dart';
 import 'package:emezen/util/errors.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:jwt_io/jwt_io.dart';
@@ -18,17 +20,21 @@ class AuthProvider with ChangeNotifier {
 
   bool _isDisposed = false;
   bool _isLoading = false;
+
   bool get isLoading => _isLoading;
 
   String get ping => "pong";
 
   AuthMethod _authMethod = AuthMethod.login;
+
   AuthMethod get authMethod => _authMethod;
 
   final StreamController<User?> _userController = StreamController();
+
   Stream<User?> get userStream => _userController.stream;
 
   User? _currentUser;
+
   User? get currentUser {
     if (_currentUser != null) return _currentUser;
 
@@ -196,6 +202,20 @@ class AuthProvider with ChangeNotifier {
     if (token != null) {
 
     }
+  }
+
+  Future<bool?> uploadProfilePicture(String id, PlatformFile image) async {
+    try {
+      String? token = await isLoggedIn();
+      if (token != null) {
+        return await _userService.uploadProfilePicture(
+            id: id, token: token, image: image);
+      }
+    } on ApiError catch (e) {
+      Fluttertoast.showToast(msg: "Error: ${e.message}");
+    }
+
+    return null;
   }
 
   @override
