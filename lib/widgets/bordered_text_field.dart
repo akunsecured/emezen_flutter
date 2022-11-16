@@ -1,13 +1,23 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 class BorderedTextField extends StatefulWidget {
   final String _hintText;
   final TextEditingController _controller;
   final TextInputType _inputType;
   late final bool _passwordText;
+  final Function? validateFun;
+  final int? maxLines;
+  final int? maxLength;
+  final RegExp? numRegExp;
 
   BorderedTextField(this._controller, this._hintText, this._inputType,
-      {Key? key, bool passwordText = false})
+      {Key? key,
+      bool passwordText = false,
+      this.validateFun,
+      this.maxLines = 1,
+      this.maxLength,
+      this.numRegExp})
       : super(key: key) {
     _passwordText = passwordText;
   }
@@ -45,6 +55,19 @@ class _BorderedTextFieldState extends State<BorderedTextField> {
                         obscureText ? Icons.visibility_off : Icons.visibility))
                 : null),
         obscureText: obscureText,
+        validator: (value) {
+          if (widget.validateFun != null) {
+            return widget.validateFun!(value);
+          }
+          return null;
+        },
+        minLines: 1,
+        maxLength: widget.maxLength,
+        inputFormatters: widget.numRegExp == null
+            ? null
+            : <TextInputFormatter>[
+                FilteringTextInputFormatter.allow(widget.numRegExp!)
+              ],
       ),
     );
   }
