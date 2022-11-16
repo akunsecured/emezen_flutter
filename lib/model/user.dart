@@ -7,6 +7,7 @@ class User {
   final int age;
   final String? contactEmail;
   final int? phoneNumber;
+  final String? about;
 
   User(
       {this.id,
@@ -14,7 +15,8 @@ class User {
       required this.lastName,
       required this.age,
       this.contactEmail,
-      this.phoneNumber});
+      this.phoneNumber,
+      this.about});
 
   Map<String, dynamic> toJson() => {
         '_id': id,
@@ -22,7 +24,8 @@ class User {
         'last_name': lastName,
         'age': age,
         'contact_email': contactEmail,
-        'phone_number': phoneNumber
+        'phone_number': phoneNumber,
+        'about': about
       };
 
   factory User.fromJson(Map<String, dynamic> json) => User(
@@ -31,7 +34,8 @@ class User {
       lastName: json['last_name'],
       age: json['age'],
       contactEmail: json['contact_email'],
-      phoneNumber: json['phone_number']);
+      phoneNumber: json['phone_number'],
+      about: json['about']);
 }
 
 class UserCredentials {

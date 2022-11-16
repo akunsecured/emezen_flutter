@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:emezen/util/constants.dart';
 import 'package:emezen/util/errors.dart';
 
 abstract class BaseService {
@@ -6,7 +7,7 @@ abstract class BaseService {
 
   BaseService() {
     dio = Dio(BaseOptions(
-      baseUrl: 'http://localhost:8080/api/v1'
+      baseUrl: Constants.apiBaseUrl
     ));
   }
 
