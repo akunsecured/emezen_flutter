@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:emezen/model/enums.dart';
 import 'package:emezen/model/user.dart';
 import 'package:emezen/model/wrapped_token.dart';
@@ -16,10 +18,26 @@ class AuthProvider with ChangeNotifier {
 
   bool _isDisposed = false;
   bool _isLoading = false;
-
   bool get isLoading => _isLoading;
 
   String get ping => "pong";
+
+  AuthMethod _authMethod = AuthMethod.login;
+  AuthMethod get authMethod => _authMethod;
+
+  final StreamController<User?> _userController = StreamController();
+  Stream<User?> get userStream => _userController.stream;
+
+  User? _currentUser;
+  User? get currentUser {
+    if (_currentUser != null) return _currentUser;
+
+    User? user;
+    getCurrentUser().then((usr) {
+      user = usr;
+    });
+    return user;
+  }
 
   AuthProvider(
       {required AuthService authService,
@@ -28,10 +46,17 @@ class AuthProvider with ChangeNotifier {
     _authService = authService;
     _userService = userService;
     _sharedPreferences = sharedPreferences;
+
+    isLoggedIn();
   }
 
   void _changeLoadingStatus() {
     _isLoading = !_isLoading;
+    if (!_isDisposed) notifyListeners();
+  }
+
+  void changeAuthMethod(AuthMethod method) {
+    _authMethod = method;
     if (!_isDisposed) notifyListeners();
   }
 
@@ -53,6 +78,11 @@ class AuthProvider with ChangeNotifier {
     } on ApiError catch (e) {
       print(e);
       Fluttertoast.showToast(msg: "Error: ${e.message}");
+    }
+
+    if (success) {
+      _userController
+          .add(User.fromJson(JwtToken.payload(tokens!.accessToken)['user']));
     }
 
     _changeLoadingStatus();
@@ -87,20 +117,22 @@ class AuthProvider with ChangeNotifier {
     return await _sharedPreferences.remove('refresh_token');
   }
 
-  Future<void> _refreshAccessToken(String token) async {
+  Future<String?> _refreshAccessToken(String token) async {
     try {
       String? accessToken = await _authService.refreshAccessToken(token);
       await _saveAccessToken(accessToken!);
+      return accessToken;
     } on ApiError catch (e) {
       print(e);
       Fluttertoast.showToast(msg: "Error: ${e.message}");
     }
+    return null;
   }
 
-  Future<bool> isLoggedIn({String? accessToken}) async {
+  Future<String?> isLoggedIn({String? accessToken}) async {
     accessToken ??= await getAccessToken();
 
-    if (accessToken == null) return false;
+    if (accessToken == null) return null;
 
     if (JwtToken.isExpired(accessToken)) {
       await _removeAccessToken();
@@ -109,30 +141,29 @@ class AuthProvider with ChangeNotifier {
 
       if (refreshToken == null || JwtToken.isExpired(refreshToken)) {
         await _removeRefreshToken();
-        return false;
+        return null;
       }
 
-      await _refreshAccessToken(accessToken);
-      return true;
+      accessToken = await _refreshAccessToken(accessToken);
     }
 
-    return true;
+    _currentUser = User.fromJson(JwtToken.payload(accessToken!)['user']);
+    _userController.add(_currentUser);
+    return accessToken;
   }
 
   Future<User?> getCurrentUser() async {
-    _changeLoadingStatus();
-
     try {
-      String? token = await getAccessToken();
-      if (await isLoggedIn(accessToken: token)) {
-        return await _authService.getCurrentUser(token!);
+      String? token = await isLoggedIn();
+      if (token != null) {
+        _currentUser = await _authService.getCurrentUser(token);
+        return _currentUser;
       }
     } on ApiError catch (e) {
       print(e);
       Fluttertoast.showToast(msg: "Error: ${e.message}");
     }
 
-    _changeLoadingStatus();
     return null;
   }
 
@@ -142,28 +173,34 @@ class AuthProvider with ChangeNotifier {
     await _removeAccessToken();
     await _removeRefreshToken();
 
+    _userController.add(null);
+
     _changeLoadingStatus();
   }
 
   Future<User?> getUser(String id) async {
-    _changeLoadingStatus();
-
     try {
-      String? token = await getAccessToken();
-      if (await isLoggedIn(accessToken: token)) {
-        return await _userService.getUser(id: id, token: token!);
+      String? token = await isLoggedIn();
+      if (token != null) {
+        return await _userService.getUser(id: id, token: token);
       }
     } on ApiError catch (e) {
-      print(e);
       Fluttertoast.showToast(msg: "Error: ${e.message}");
     }
 
-    _changeLoadingStatus();
     return null;
+  }
+
+  Future<String?> getCurrentUserId() async {
+    String? token = await isLoggedIn();
+    if (token != null) {
+
+    }
   }
 
   @override
   void dispose() {
+    _userController.close();
     _isDisposed = true;
     super.dispose();
   }

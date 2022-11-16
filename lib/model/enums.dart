@@ -5,3 +5,7 @@ enum AuthMethod {
 enum UserWrapperType {
   userData, credentials, userDataWithCredentials
 }
+
+enum MainPages {
+  home, profile,
+}

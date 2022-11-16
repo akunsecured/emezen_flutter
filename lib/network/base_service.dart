@@ -11,6 +11,7 @@ abstract class BaseService {
   }
 
   void handleNetworkError(DioError e) {
+    print(e);
     if (e.response != null) {
       throw ApiError(
           message: e.response!.data['message'],
