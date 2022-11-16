@@ -3,6 +3,7 @@ class Validation {
       r'^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$');
   static RegExp passwordRegExp = RegExp(
       r'^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[*.!@$%^&(){}[]:;<>,.?/~_+-=|\]).{8,64}$');
+  static RegExp ageRegExp = RegExp(r'^[0-9]{1,3}$');
 
   static String? validateEmail(String? value, {bool isNeeded = true}) {
     if (isNeeded && (value == null || value.isEmpty)) {
@@ -18,18 +19,25 @@ class Validation {
     if (isNeeded && (value == null || value.isEmpty)) {
       return 'Password must be filled';
     }
-    if (value != null && value.isNotEmpty && value.length < 6) {
-      return 'Password should be at least 6 characters';
+    if (value != null && value.isNotEmpty && value.length < 8) {
+      if (value.length < 8) {
+        return 'Password should be at least 8 characters';
+      }
+      if (value.length > 64) {
+        return 'Password should be at most 64 characters';
+      }
     }
     return null;
   }
 
-  static String? validateName(String? value, {bool isNeeded = true}) {
+  static String? validatePartOfName(String? value, {bool isNeeded = true}) {
     if (isNeeded && (value == null || value.isEmpty)) {
-      return 'Name must be filled';
+      return 'This field must be filled';
     }
-    if (value != null && value.isNotEmpty && value.length < 2) {
-      return 'Name should be at least 2 characters';
+    if (value != null && value.isNotEmpty) {
+      if (value.length > 100) {
+        return 'This field cannot be longer than 50 characters';
+      }
     }
     return null;
   }
@@ -46,8 +54,33 @@ class Validation {
     if (isNeeded && (value == null || value.isEmpty)) {
       return 'Phone number must be filled';
     }
-    if (value != null && value.isNotEmpty && value.length != 11) {
-      return 'Phone number must be 11 characters';
+    if (value != null && value.isNotEmpty) {
+      int? parsedNum = int.tryParse(value);
+      if (parsedNum == null) {
+        return 'Bad format for a number';
+      }
+      if (value.length != 11) {
+        return 'Phone number must be 11 characters';
+      }
+    }
+    return null;
+  }
+
+  static String? validateAge(String? value, {bool isNeeded = true}) {
+    if (isNeeded && (value == null || value.isEmpty)) {
+      return 'Age must be filled';
+    }
+    if (value != null && value.isNotEmpty) {
+      int? parsedNum = int.tryParse(value);
+      if (parsedNum == null) {
+        return 'Bad format for a number';
+      }
+      if (parsedNum < 13) {
+        return 'The number which was given for the age is too low';
+      }
+      if (parsedNum > 100) {
+        return 'The number which was given for the age is too high';
+      }
     }
     return null;
   }
