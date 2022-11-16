@@ -78,7 +78,7 @@ class _RegisterFormState extends State<RegisterForm> {
             'Age',
             TextInputType.number,
             validateFun: Validation.validateAge,
-            numRegExp: Validation.ageRegExp,
+            numRegExp: Validation.numUntil999RegExp,
           ),
           BorderedTextField(
             _emailController,

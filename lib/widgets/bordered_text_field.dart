@@ -62,6 +62,7 @@ class _BorderedTextFieldState extends State<BorderedTextField> {
           return null;
         },
         minLines: 1,
+        maxLines: widget.maxLines,
         maxLength: widget.maxLength,
         inputFormatters: widget.numRegExp == null
             ? null
