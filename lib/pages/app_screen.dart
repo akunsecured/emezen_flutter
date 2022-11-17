@@ -7,11 +7,12 @@ import 'package:emezen/pages/not_found_page.dart';
 import 'package:emezen/pages/error_page.dart';
 import 'package:emezen/pages/profile_page.dart';
 import 'package:emezen/provider/auth_provider.dart';
+import 'package:emezen/provider/cart_provider.dart';
 import 'package:emezen/provider/main_page_provider.dart';
 import 'package:emezen/style/app_theme.dart';
 import 'package:emezen/util/constants.dart';
 import 'package:emezen/widgets/drawer_list_tile.dart';
-import 'package:emezen/widgets/search_bar.dart';
+import 'package:emezen/widgets/shopping_cart_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -92,15 +93,66 @@ class _AppScreenState extends State<AppScreen> {
     Provider.of<AuthProvider>(context, listen: false).logout();
   }
 
+  Widget _cartIcon() => Consumer<CartProvider>(
+        builder: (context, cartProvider, child) => Stack(
+          children: [
+            IconButton(
+                onPressed: () => showDialog(
+                    context: context,
+                    builder: (_) => ChangeNotifierProvider.value(
+                        value:
+                            Provider.of<CartProvider>(context, listen: false),
+                        child: ChangeNotifierProvider.value(
+                            value: Provider.of<AuthProvider>(context,
+                                listen: false),
+                            child: const ShoppingCartDialog()))),
+                icon: const Icon(
+                  Icons.shopping_cart,
+                  color: AppTheme.appBarSecondaryColor,
+                )),
+            cartProvider.cart.isNotEmpty
+                ? Positioned.fill(
+                    child: Align(
+                    alignment: Alignment.topRight,
+                    child: Container(
+                      padding: const EdgeInsets.all(2.0),
+                      decoration: BoxDecoration(
+                          color: Colors.red,
+                          shape: BoxShape.rectangle,
+                          borderRadius: BorderRadius.circular(10)),
+                      child: Text(
+                        cartProvider.cart.length.toString(),
+                        textAlign: TextAlign.center,
+                        style: const TextStyle(
+                          fontSize: 12,
+                          color: AppTheme.appBarSecondaryColor,
+                        ),
+                      ),
+                    ),
+                  ))
+                : const SizedBox()
+          ],
+        ),
+      );
+
   Widget _mobileScaffold() => Scaffold(
         key: _scaffoldKey,
         appBar: AppBar(
-          title: SizedBox(
-            width: MediaQuery.of(context).size.width * 0.7,
-            child: const SearchBar(),
+          title: Container(
+            height: AppBar().preferredSize.height,
+            padding: const EdgeInsets.all(12),
+            child: const Image(
+              image: AssetImage('assets/images/emezen-logo.png'),
+            ),
           ),
           centerTitle: true,
           iconTheme: const IconThemeData(color: AppTheme.appBarSecondaryColor),
+          actions: [
+            Center(
+                child: Container(
+                    margin: const EdgeInsets.all(12.0),
+                    child: Builder(builder: (context) => _cartIcon()))),
+          ],
         ),
         drawer: Drawer(
           backgroundColor: AppTheme.drawerBackgroundColor,
@@ -173,35 +225,38 @@ class _AppScreenState extends State<AppScreen> {
 
   Widget _desktopScaffold() => Scaffold(
         appBar: AppBar(
-          title: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Container(
-                height: AppBar().preferredSize.height,
-                padding: const EdgeInsets.all(12),
-                child: const Image(
-                  image: AssetImage('assets/images/emezen-logo.png'),
-                ),
-              ),
-              const Expanded(
-                child: SearchBar(),
-              ),
-              PopupMenuButton(
-                  itemBuilder: (BuildContext context) => _getPopupMenuItems(),
-                  child: Builder(
-                    builder: (context) => Row(
-                      children: [
-                        Text(_getHelloText(),
-                            style: const TextStyle(
-                                color: AppTheme.appBarSecondaryColor)),
-                        const Icon(Icons.arrow_drop_down_sharp,
-                            color: AppTheme.appBarSecondaryColor)
-                      ],
-                    ),
-                  ))
-            ],
+          title: Container(
+            height: AppBar().preferredSize.height,
+            padding: const EdgeInsets.all(12),
+            child: const Image(
+              image: AssetImage('assets/images/emezen-logo.png'),
+            ),
           ),
           centerTitle: true,
+          actions: [
+            Center(
+              child: Builder(
+                builder: (context) => _cartIcon(),
+              ),
+            ),
+            const SizedBox(
+              width: 24,
+            ),
+            PopupMenuButton(
+                itemBuilder: (BuildContext context) => _getPopupMenuItems(),
+                child: Builder(
+                  builder: (context) => Row(
+                    children: [
+                      Text(_getHelloText(),
+                          style: const TextStyle(
+                              fontSize: 20,
+                              color: AppTheme.appBarSecondaryColor)),
+                      const Icon(Icons.arrow_drop_down_sharp,
+                          color: AppTheme.appBarSecondaryColor)
+                    ],
+                  ),
+                ))
+          ],
         ),
         body: Builder(
           builder: (context) => _getBody(),

@@ -10,6 +10,7 @@ class BorderedTextField extends StatefulWidget {
   final int? maxLines;
   final int? maxLength;
   final RegExp? numRegExp;
+  final bool? isEnabled;
 
   BorderedTextField(this._controller, this._hintText, this._inputType,
       {Key? key,
@@ -17,7 +18,8 @@ class BorderedTextField extends StatefulWidget {
       this.validateFun,
       this.maxLines = 1,
       this.maxLength,
-      this.numRegExp})
+      this.numRegExp,
+      this.isEnabled = true})
       : super(key: key) {
     _passwordText = passwordText;
   }
@@ -69,6 +71,7 @@ class _BorderedTextFieldState extends State<BorderedTextField> {
             : <TextInputFormatter>[
                 FilteringTextInputFormatter.allow(widget.numRegExp!)
               ],
+        enabled: widget.isEnabled,
       ),
     );
   }
