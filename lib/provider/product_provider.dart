@@ -101,6 +101,22 @@ class ProductProvider extends ChangeNotifier {
     return products;
   }
 
+  Future<bool> deleteProduct(String id) async {
+    bool success = false;
+
+    try {
+      String? token = await _authProvider.isLoggedIn();
+      if (token != null) {
+        success = await _productService.deleteProduct(id, token);
+      }
+    } on ApiError catch (e) {
+      print(e);
+      Fluttertoast.showToast(msg: "Error: ${e.message}");
+    }
+
+    return success;
+  }
+
   @override
   void dispose() {
     _isDisposed = true;

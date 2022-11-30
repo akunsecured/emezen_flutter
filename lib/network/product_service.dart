@@ -102,11 +102,28 @@ class ProductService extends BaseService {
     return [];
   }
 
-  Future<bool> buyProducts(Map<String, int> productsWithCount, String token) async {
+  Future<bool> buyProducts(
+      Map<String, int> productsWithCount, String token) async {
     try {
       final response = await dio.post('/buy',
           options: Options(headers: {'Authorization': 'Bearer $token'}),
           data: productsWithCount);
+      if (response.statusCode == 200) {
+        print(response.data);
+        return true;
+      }
+    } on DioError catch (e) {
+      handleNetworkError(e);
+    }
+    return false;
+  }
+
+  Future<bool> deleteProduct(String id, String token) async {
+    try {
+      final response = await dio.delete(
+        '/delete/$id',
+        options: Options(headers: {'Authorization': 'Bearer $token'}),
+      );
       if (response.statusCode == 200) {
         print(response.data);
         return true;

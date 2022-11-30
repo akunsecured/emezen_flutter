@@ -8,6 +8,7 @@ enum MainPages {
   home,
   profile,
   newProduct,
+  product,
 }
 
 enum ProfileTabs {
@@ -50,4 +51,9 @@ extension ProductCategoriesExtension on ProductCategories {
         return 'Unknown';
     }
   }
+}
+
+enum DeleteType {
+  product,
+  profile,
 }

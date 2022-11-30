@@ -40,8 +40,8 @@ class _NewProductPageState extends State<NewProductPage> {
               Provider.of<AddProductProvider>(context, listen: false);
           return Center(
             child: Container(
-              width: 400,
-              margin: const EdgeInsets.symmetric(vertical: 24),
+              constraints: const BoxConstraints(maxWidth: 480),
+              margin: const EdgeInsets.all(24),
               decoration: BoxDecoration(
                   border: Border.all(color: Colors.black38, width: 2.0),
                   borderRadius: const BorderRadius.all(Radius.circular(12))),
@@ -143,40 +143,70 @@ class _NewProductPageState extends State<NewProductPage> {
                         Selector<AddProductProvider, List<PlatformFile>>(
                             selector: (_, addProductProvider) =>
                                 addProductProvider.images,
-                            builder: (_, images, __) {
-                              print(images.length);
-                              return ResponsiveGridRow(
-                                  children: images
-                                      .map((image) => ResponsiveGridCol(
+                            builder: (_, images, __) => ResponsiveGridRow(
+                                children: images
+                                    .map((image) => ResponsiveGridCol(
                                           xs: 12,
                                           sm: 6,
                                           md: 4,
-                                          child: Stack(children: [
-                                            Image.memory(
-                                              image.bytes!,
+                                          child: Center(
+                                            child: SizedBox(
                                               width: 128,
                                               height: 128,
-                                              fit: BoxFit.cover,
+                                              child: Stack(children: [
+                                                Container(
+                                                    margin:
+                                                        const EdgeInsets.all(
+                                                            8.0),
+                                                    alignment: Alignment.center,
+                                                    decoration:
+                                                        const BoxDecoration(
+                                                      color: Colors.black38,
+                                                      borderRadius:
+                                                          BorderRadius.all(
+                                                        Radius.circular(24.0),
+                                                      ),
+                                                    ),
+                                                    child: ClipRRect(
+                                                      borderRadius:
+                                                          BorderRadius.circular(
+                                                              24.0),
+                                                      child: Image.memory(
+                                                        image.bytes!,
+                                                        fit: BoxFit.cover,
+                                                        width: 128,
+                                                        height: 128,
+                                                      ),
+                                                    )),
+                                                Positioned.fill(
+                                                  child: Align(
+                                                    alignment:
+                                                        Alignment.topRight,
+                                                    child: Container(
+                                                      margin:
+                                                          const EdgeInsets.all(
+                                                              4.0),
+                                                      child: IconButton(
+                                                        color: Colors.red,
+                                                        icon: const Icon(
+                                                          Icons.delete,
+                                                          color: Colors.red,
+                                                        ),
+                                                        tooltip: 'Remove',
+                                                        onPressed: () {
+                                                          addProductProvider
+                                                              .removeImage(
+                                                                  image);
+                                                        },
+                                                      ),
+                                                    ),
+                                                  ),
+                                                )
+                                              ]),
                                             ),
-                                            Positioned.fill(
-                                                child: Align(
-                                              alignment: Alignment.topRight,
-                                              child: IconButton(
-                                                color: Colors.red,
-                                                icon: const Icon(
-                                                  Icons.delete,
-                                                  color: Colors.white,
-                                                ),
-                                                onPressed: () {
-                                                  addProductProvider
-                                                      .removeImage(image);
-                                                  setState(() {});
-                                                },
-                                              ),
-                                            ))
-                                          ])))
-                                      .toList());
-                            }),
+                                          ),
+                                        ))
+                                    .toList())),
                         Container(
                           width: double.infinity,
                           margin: const EdgeInsets.only(

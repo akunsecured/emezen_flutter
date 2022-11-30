@@ -36,6 +36,7 @@ class CartProvider extends ChangeNotifier {
       bool success = await _productService.buyProducts(
           _cart.map((product, quantity) => MapEntry(product.id!, quantity)), token);
       if (success) {
+        Fluttertoast.showToast(msg: "Successful purchase");
         clearCart();
       }
     } on ApiError catch (e) {

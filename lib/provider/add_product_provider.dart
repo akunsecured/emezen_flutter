@@ -5,6 +5,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 class AddProductProvider extends ChangeNotifier {
+  bool _isDisposed = false;
+
   final String _sellerId;
 
   late final TextEditingController _nameController,
@@ -29,7 +31,8 @@ class AddProductProvider extends ChangeNotifier {
   ProductCategories get selectedCategory => _selectedCategory;
   void setSelectedCategory(ProductCategories? category) {
     _selectedCategory = category ?? ProductCategories.values[0];
-    notifyListeners();
+
+    if (!_isDisposed) notifyListeners();
   }
 
   List<PlatformFile> images = [];
@@ -45,12 +48,14 @@ class AddProductProvider extends ChangeNotifier {
 
   void setImages(List<PlatformFile> images) {
     this.images = images;
-    notifyListeners();
+
+    if (!_isDisposed) notifyListeners();
   }
 
   void removeImage(PlatformFile image) {
-    this.images.remove(image);
-    notifyListeners();
+    images.remove(image);
+
+    if (!_isDisposed) notifyListeners();
   }
 
   void clear() {
@@ -60,5 +65,13 @@ class AddProductProvider extends ChangeNotifier {
     _quantityController.clear();
 
     images.clear();
+
+    if (!_isDisposed) notifyListeners();
+  }
+
+  @override
+  void dispose() {
+    _isDisposed = true;
+    super.dispose();
   }
 }

@@ -29,6 +29,7 @@ class _AppScreenState extends State<AppScreen> {
   late final MainPageProvider _mainPageProvider;
   late final GlobalKey<ScaffoldState> _scaffoldKey;
   late User currentUser;
+  late Widget _body;
 
   @override
   void initState() {
@@ -36,7 +37,10 @@ class _AppScreenState extends State<AppScreen> {
     _mainPageProvider = Provider.of<MainPageProvider>(context, listen: false);
     _scaffoldKey = GlobalKey<ScaffoldState>();
     currentUser = widget.user;
+    _body = Builder(builder: (context) => _getBody());
   }
+
+  // TODO: termékfigyelő notificationként az alkalmazás tetején, formázás a termékleírásra
 
   Widget _getBody() => Consumer<MainPageProvider>(
       builder: (context, pageProvider, child) =>
@@ -64,7 +68,6 @@ class _AppScreenState extends State<AppScreen> {
                       }
                       return NewProductPage(userId: actualPage.args['id']);
                     }
-
                   default:
                     return const NotFoundPage();
                 }
@@ -202,9 +205,7 @@ class _AppScreenState extends State<AppScreen> {
             ],
           ),
         ),
-        body: Builder(
-          builder: (context) => _getBody(),
-        ),
+        body: _body,
       );
 
   List<PopupMenuItem> _getPopupMenuItems() => [
@@ -258,9 +259,7 @@ class _AppScreenState extends State<AppScreen> {
                 ))
           ],
         ),
-        body: Builder(
-          builder: (context) => _getBody(),
-        ),
+        body: _body,
       );
 
   @override
