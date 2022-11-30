@@ -4,6 +4,8 @@ import 'package:emezen/network/user_service.dart';
 import 'package:emezen/pages/app_wrapper.dart';
 import 'package:emezen/provider/auth_provider.dart';
 import 'package:emezen/provider/cart_provider.dart';
+import 'package:emezen/provider/product_provider.dart';
+import 'package:emezen/provider/profile_page_provider.dart';
 import 'package:emezen/style/app_theme.dart';
 import 'package:emezen/util/constants.dart';
 import 'package:flutter/material.dart';
@@ -39,6 +41,8 @@ class _EmezenAppState extends State<EmezenApp> {
 
   late final AuthProvider _authProvider;
   late final CartProvider _cartProvider;
+  late final ProfilePageProvider _profilePageProvider;
+  late final ProductProvider _productProvider;
 
   @override
   void initState() {
@@ -52,6 +56,10 @@ class _EmezenAppState extends State<EmezenApp> {
         userService: _userService,
         sharedPreferences: widget.sharedPreferences);
     _cartProvider = CartProvider(_productService);
+    _profilePageProvider =
+        ProfilePageProvider(_authService, widget.sharedPreferences);
+    _productProvider = ProductProvider(
+        _productService, _authService, widget.sharedPreferences);
   }
 
   @override
@@ -68,6 +76,10 @@ class _EmezenAppState extends State<EmezenApp> {
             Provider<ProductService>(create: (_) => _productService),
             ChangeNotifierProvider<AuthProvider>(create: (_) => _authProvider),
             ChangeNotifierProvider<CartProvider>(create: (_) => _cartProvider),
+            ChangeNotifierProvider<ProfilePageProvider>(
+                create: (_) => _profilePageProvider),
+            ChangeNotifierProvider<ProductProvider>(
+                create: (_) => _productProvider),
           ],
           child: const AppWrapper(),
         ),

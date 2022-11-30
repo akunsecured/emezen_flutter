@@ -35,10 +35,6 @@ class _AppWrapperState extends State<AppWrapper> {
           return MultiProvider(
             providers: [
               ChangeNotifierProvider(create: (_) => MainPageProvider()),
-              ChangeNotifierProvider(create: (_) => ProfilePageProvider()),
-              ChangeNotifierProvider(
-                  create: (_) => ProductProvider(_authProvider,
-                      Provider.of<ProductService>(context, listen: false)))
             ],
             child: AppScreen(user: user),
           );

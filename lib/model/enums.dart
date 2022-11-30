@@ -1,5 +1,3 @@
-import 'package:emezen/model/enums.dart';
-
 enum AuthMethod { login, register }
 
 enum UserWrapperType { userData, credentials, userDataWithCredentials }
