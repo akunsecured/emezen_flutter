@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:emezen/model/product.dart';
+import 'package:emezen/model/search_filter.dart';
 import 'package:emezen/network/base_service.dart';
 import 'package:file_picker/file_picker.dart';
 
@@ -49,9 +50,26 @@ class ProductService extends BaseService {
     return false;
   }
 
-  Future<List<Product>> getAllProducts(String token) async {
+  Future<List<Product>> getAllProducts(
+      SearchFilter searchFilter, String token) async {
     try {
+      Map<String, dynamic> queryParameters = {};
+
+      if (searchFilter.name != null) {
+        queryParameters['name'] = searchFilter.name;
+      }
+      if (searchFilter.priceFrom != null) {
+        queryParameters['price_from'] = searchFilter.priceFrom;
+      }
+      if (searchFilter.priceTo != null) {
+        queryParameters['price_to'] = searchFilter.priceTo;
+      }
+      if (searchFilter.categories.isNotEmpty) {
+        queryParameters['categories'] = searchFilter.categories.join(',');
+      }
+
       final response = await dio.get('/get_all',
+          queryParameters: queryParameters,
           options: Options(headers: {'Authorization': 'Bearer $token'}));
       if (response.statusCode == 200) {
         print(response.data['message']);

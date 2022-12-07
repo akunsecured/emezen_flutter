@@ -1,11 +1,13 @@
-import 'dart:io';
-
 import 'package:emezen/model/enums.dart';
 import 'package:emezen/model/product.dart';
 import 'package:emezen/model/user.dart';
+import 'package:emezen/pages/product_page.dart';
 import 'package:emezen/provider/auth_provider.dart';
+import 'package:emezen/provider/cart_provider.dart';
+import 'package:emezen/provider/product_page_provider.dart';
 import 'package:emezen/provider/product_provider.dart';
 import 'package:emezen/provider/profile_page_provider.dart';
+import 'package:emezen/style/app_theme.dart';
 import 'package:emezen/util/constants.dart';
 import 'package:emezen/widgets/bordered_text_field.dart';
 import 'package:emezen/widgets/product_card.dart';
@@ -43,6 +45,29 @@ class _ProfilePageState extends State<ProfilePage> {
     _shopFuture = _productProvider.getAllProductsOfUser(widget.userId);
   }
 
+  Future<void> _navigateToProductPage(Product product) async {
+    AuthProvider authProvider =
+        Provider.of<AuthProvider>(context, listen: false);
+
+    ProductProvider productProvider =
+        Provider.of<ProductProvider>(context, listen: false);
+
+    CartProvider cartProvider =
+        Provider.of<CartProvider>(context, listen: false);
+
+    var result = await Navigator.of(context).push(MaterialPageRoute(
+        builder: (context) => MultiProvider(
+              providers: [
+                ChangeNotifierProvider.value(value: authProvider),
+                ChangeNotifierProvider.value(value: productProvider),
+                ChangeNotifierProvider.value(value: cartProvider),
+                ChangeNotifierProvider(
+                    create: (_) => ProductPageProvider(product)),
+              ],
+              child: const ProductPage(),
+            )));
+  }
+
   Widget _buildAboutTab(User user) => Selector<ProfilePageProvider, bool>(
       selector: (_, profilePageProvider) =>
           profilePageProvider.isEditingProfile,
@@ -58,8 +83,8 @@ class _ProfilePageState extends State<ProfilePage> {
               ],
             )
           : Container(
-        margin: EdgeInsets.all(16.0),
-            child: Row(
+              margin: EdgeInsets.all(16.0),
+              child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Column(
@@ -82,7 +107,7 @@ class _ProfilePageState extends State<ProfilePage> {
                   )
                 ],
               ),
-          ));
+            ));
 
   Widget _buildShopTab(User user) => FutureBuilder(
         future: _shopFuture,
@@ -110,7 +135,10 @@ class _ProfilePageState extends State<ProfilePage> {
                         sm: 6,
                         md: 4,
                         lg: 3,
-                        child: ProductCard(product: product)))
+                        child: ProductCard(
+                          product: product,
+                          onTap: _navigateToProductPage,
+                        )))
                     .toList());
           }
 
@@ -293,25 +321,33 @@ class _ProfilePageState extends State<ProfilePage> {
       );
 
   @override
-  Widget build(BuildContext context) => FutureBuilder(
-        future: _future,
-        builder: (context, AsyncSnapshot<User?> snapshot) {
-          if (snapshot.hasError) {
-            return Center(child: Text('Error: ${snapshot.error}'));
-          }
-
-          if (snapshot.connectionState == ConnectionState.done) {
-            if (snapshot.data == null) {
-              return const Center(child: Text('Error: user does not exist'));
+  Widget build(BuildContext context) => Scaffold(
+        appBar: AppBar(
+          centerTitle: true,
+          title: const Text('Profile',
+              style: TextStyle(color: AppTheme.appBarSecondaryColor)),
+          iconTheme: const IconThemeData(color: AppTheme.appBarSecondaryColor),
+        ),
+        body: FutureBuilder(
+          future: _future,
+          builder: (context, AsyncSnapshot<User?> snapshot) {
+            if (snapshot.hasError) {
+              return Center(child: Text('Error: ${snapshot.error}'));
             }
 
-            return Consumer<ProfilePageProvider>(
-              builder: (_, profilePageProvider, __) => Builder(
-                  builder: (context) => _buildProfilePage(snapshot.data!)),
-            );
-          }
+            if (snapshot.connectionState == ConnectionState.done) {
+              if (snapshot.data == null) {
+                return const Center(child: Text('Error: user does not exist'));
+              }
 
-          return const Center(child: CircularProgressIndicator());
-        },
+              return Consumer<ProfilePageProvider>(
+                builder: (_, profilePageProvider, __) => Builder(
+                    builder: (context) => _buildProfilePage(snapshot.data!)),
+              );
+            }
+
+            return const Center(child: CircularProgressIndicator());
+          },
+        ),
       );
 }

@@ -1,11 +1,7 @@
 import 'package:emezen/model/user.dart';
-import 'package:emezen/network/product_service.dart';
 import 'package:emezen/pages/auth_screen.dart';
 import 'package:emezen/pages/app_screen.dart';
 import 'package:emezen/provider/auth_provider.dart';
-import 'package:emezen/provider/main_page_provider.dart';
-import 'package:emezen/provider/product_provider.dart';
-import 'package:emezen/provider/profile_page_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -32,12 +28,7 @@ class _AppWrapperState extends State<AppWrapper> {
         User? user = snapshot.data;
 
         if (user != null) {
-          return MultiProvider(
-            providers: [
-              ChangeNotifierProvider(create: (_) => MainPageProvider()),
-            ],
-            child: AppScreen(user: user),
-          );
+          return AppScreen(user: user);
         }
 
         return const AuthScreen();

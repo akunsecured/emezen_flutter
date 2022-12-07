@@ -306,8 +306,7 @@ class _ProductPageState extends State<ProductPage> {
                                         deleteType: DeleteType.product),
                                   ));
                           if (success ?? false) {
-                            Navigator.of(context)
-                                .popUntil((route) => route.isFirst);
+                            Navigator.of(context).pop(success);
                           }
                         },
                         tooltip: 'Delete product',

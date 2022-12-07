@@ -6,9 +6,9 @@ class ErrorPage extends StatelessWidget {
   const ErrorPage({Key? key, required this.error}) : super(key: key);
 
   @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: Text('Error: $error'),
-    );
-  }
+  Widget build(BuildContext context) => Scaffold(
+        body: Center(
+          child: Text('Error: $error'),
+        ),
+      );
 }

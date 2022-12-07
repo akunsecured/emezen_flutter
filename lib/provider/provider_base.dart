@@ -12,7 +12,15 @@ abstract class ProviderBase extends ChangeNotifier {
   bool _isDisposed = false;
   bool get isDisposed => _isDisposed;
 
+  bool _isLoading = false;
+  bool get isLoading => _isLoading;
+
   ProviderBase(this._authService, this._sharedPreferences);
+
+  void changeLoadingStatus() {
+    _isLoading = !_isLoading;
+    if (!_isDisposed) notifyListeners();
+  }
 
   String? getAccessToken() {
     return _sharedPreferences.getString('access_token');

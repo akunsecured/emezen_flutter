@@ -1,4 +1,6 @@
+import 'package:emezen/model/enums.dart';
 import 'package:emezen/model/product.dart';
+import 'package:emezen/model/search_filter.dart';
 import 'package:emezen/network/auth_service.dart';
 import 'package:emezen/network/product_service.dart';
 import 'package:emezen/provider/provider_base.dart';
@@ -10,23 +12,71 @@ import 'package:shared_preferences/shared_preferences.dart';
 class ProductProvider extends ProviderBase {
   final ProductService _productService;
 
-  bool _isDisposed = false;
-  bool _isLoading = false;
+  final SearchFilter _searchFilter = SearchFilter();
 
-  bool get isLoading => _isLoading;
+  final List<Product> _products = [];
+  final List<Product> _filteredProducts = [];
+
+  String? _searchTitle;
+  double? _priceFrom;
+  double? _priceTo;
+
+  List<Product> get products => _products;
+
+  List<Product> get filteredProducts => _filteredProducts;
+
+  List<ProductCategories> get categories => ProductCategories.values;
 
   ProductProvider(this._productService, AuthService authService,
       SharedPreferences sharedPreferences)
       : super(authService, sharedPreferences);
 
-  void _changeLoadingStatus() {
-    _isLoading = !_isLoading;
-    if (!_isDisposed) notifyListeners();
+  void setTitle(String? value) {
+    if (value == null || value.isEmpty) {
+      _searchTitle = null;
+    } else {
+      _searchTitle = value;
+    }
+  }
+
+  void setPriceFrom(String? value) {
+    if (value == null || value.isEmpty) {
+      _priceFrom = null;
+    } else {
+      _priceFrom = double.parse(value);
+    }
+  }
+
+  void setPriceTo(String? value) {
+    if (value == null || value.isEmpty) {
+      _priceTo = null;
+    } else {
+      _priceTo = double.parse(value);
+    }
+  }
+
+  bool containsCategoryFilter(int category) =>
+      _searchFilter.categories.contains(category);
+
+  void addOrRemoveCategoryFilter(int category) {
+    if (containsCategoryFilter(category)) {
+      _searchFilter.categories.remove(category);
+    } else {
+      _searchFilter.categories.add(category);
+    }
+
+    if (!isDisposed) notifyListeners();
+  }
+
+  void setNameFilter(String value) {
+    _searchFilter.name = value.trim().toLowerCase();
+
+    if (!isDisposed) notifyListeners();
   }
 
   Future<String?> createProduct(
       Product product, List<PlatformFile> images) async {
-    _changeLoadingStatus();
+    changeLoadingStatus();
 
     String? result;
     String? productId;
@@ -53,24 +103,32 @@ class ProductProvider extends ProviderBase {
       Fluttertoast.showToast(msg: "Error: ${e.message}");
     }
 
-    _changeLoadingStatus();
+    changeLoadingStatus();
     return result;
   }
 
-  Future<List<Product>> getAllProducts() async {
-    List<Product> products = [];
+  Future<void> getAllProducts() async {
+    _products.clear();
+    changeLoadingStatus();
 
     try {
       String? token = await isLoggedIn();
       if (token != null) {
-        products = await _productService.getAllProducts(token);
+        _searchFilter.name = _searchTitle;
+        _searchFilter.priceFrom = _priceFrom;
+        _searchFilter.priceTo = _priceTo;
+
+        List<Product> products =
+            await _productService.getAllProducts(_searchFilter, token);
+        _products.addAll(products);
       }
     } on ApiError catch (e) {
       print(e);
       Fluttertoast.showToast(msg: "Error: ${e.message}");
     }
 
-    return products;
+    changeLoadingStatus();
+    return;
   }
 
   Future<Product?> getProduct(String id) async {
@@ -117,11 +175,5 @@ class ProductProvider extends ProviderBase {
     }
 
     return success;
-  }
-
-  @override
-  void dispose() {
-    _isDisposed = true;
-    super.dispose();
   }
 }

@@ -123,8 +123,8 @@ class Validation {
       return 'Details must be filled';
     }
     if (value != null && value.isNotEmpty) {
-      if (value.length > 500) {
-        return 'Details cannot be longer than 500 characters';
+      if (value.length > 1500) {
+        return 'Details cannot be longer than 1500 characters';
       }
     }
     return null;

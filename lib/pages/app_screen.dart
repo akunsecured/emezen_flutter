@@ -1,17 +1,17 @@
 import 'package:emezen/model/enums.dart';
-import 'package:emezen/model/page_with_args.dart';
 import 'package:emezen/model/user.dart';
 import 'package:emezen/pages/home_page.dart';
-import 'package:emezen/pages/new_product_page.dart';
 import 'package:emezen/pages/not_found_page.dart';
 import 'package:emezen/pages/error_page.dart';
 import 'package:emezen/pages/profile_page.dart';
 import 'package:emezen/provider/auth_provider.dart';
 import 'package:emezen/provider/cart_provider.dart';
-import 'package:emezen/provider/main_page_provider.dart';
+import 'package:emezen/provider/product_provider.dart';
+import 'package:emezen/provider/profile_page_provider.dart';
 import 'package:emezen/style/app_theme.dart';
 import 'package:emezen/util/constants.dart';
 import 'package:emezen/widgets/drawer_list_tile.dart';
+import 'package:emezen/widgets/new_product_dialog.dart';
 import 'package:emezen/widgets/shopping_cart_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -26,7 +26,6 @@ class AppScreen extends StatefulWidget {
 }
 
 class _AppScreenState extends State<AppScreen> {
-  late final MainPageProvider _mainPageProvider;
   late final GlobalKey<ScaffoldState> _scaffoldKey;
   late User currentUser;
   late Widget _body;
@@ -34,48 +33,68 @@ class _AppScreenState extends State<AppScreen> {
   @override
   void initState() {
     super.initState();
-    _mainPageProvider = Provider.of<MainPageProvider>(context, listen: false);
     _scaffoldKey = GlobalKey<ScaffoldState>();
     currentUser = widget.user;
-    _body = Builder(builder: (context) => _getBody());
+    _body = const HomePage();
   }
 
   // TODO: termékfigyelő notificationként az alkalmazás tetején, formázás a termékleírásra
+  void _getAllProducts() =>
+      Provider.of<ProductProvider>(context, listen: false).getAllProducts();
 
-  Widget _getBody() => Consumer<MainPageProvider>(
-      builder: (context, pageProvider, child) =>
-          Selector<MainPageProvider, PageWithArgs>(
-              selector: (_, pageProvider) => pageProvider.actualPage,
-              builder: (_, actualPage, __) {
-                switch (actualPage.page) {
-                  case MainPages.home:
-                    return const HomePage();
-                  case MainPages.profile:
-                    {
-                      if (actualPage.args.isEmpty ||
-                          actualPage.args['id'] == null) {
-                        return const ErrorPage(
-                            error: "No 'id' is given as argument");
-                      }
-                      return ProfilePage(userId: actualPage.args['id']);
-                    }
-                  case MainPages.newProduct:
-                    {
-                      if (actualPage.args.isEmpty ||
-                          actualPage.args['id'] == null) {
-                        return const ErrorPage(
-                            error: "No 'userId' is given as argument");
-                      }
-                      return NewProductPage(userId: actualPage.args['id']);
-                    }
-                  default:
-                    return const NotFoundPage();
-                }
-              }));
+  Future<void> _navigate(MainPages destination,
+      {Map<String, dynamic> args = const {}}) async {
+    AuthProvider authProvider =
+        Provider.of<AuthProvider>(context, listen: false);
+    ProductProvider productProvider =
+        Provider.of<ProductProvider>(context, listen: false);
+    ProfilePageProvider profilePageProvider =
+        Provider.of<ProfilePageProvider>(context, listen: false);
+    CartProvider cartProvider =
+        Provider.of<CartProvider>(context, listen: false);
 
-  void _navigate(MainPages destination,
-      {Map<String, dynamic> args = const {}}) {
-    _mainPageProvider.changePage(destination, args: args);
+    switch (destination) {
+      case MainPages.profile:
+        Navigator.of(context).push(MaterialPageRoute(builder: (_) {
+          String? userId = args['id'];
+
+          if (userId == null) return const ErrorPage(error: 'User ID is null');
+
+          return MultiProvider(
+            providers: [
+              ChangeNotifierProvider.value(value: authProvider),
+              ChangeNotifierProvider.value(value: productProvider),
+              ChangeNotifierProvider.value(value: profilePageProvider),
+              ChangeNotifierProvider.value(value: cartProvider),
+            ],
+            child: ProfilePage(userId: userId),
+          );
+        }));
+        break;
+      case MainPages.newProduct:
+        String? userId = args['id'];
+
+        if (userId == null) {
+          Navigator.of(context).push(MaterialPageRoute(
+              builder: (_) => const ErrorPage(error: 'User ID is null')));
+        }
+
+        var result = await showDialog(
+            context: context,
+            builder: (_) => MultiProvider(
+                  providers: [
+                    ChangeNotifierProvider.value(value: productProvider),
+                  ],
+                  child: NewProductDialog(userId: userId!),
+                ));
+        if (result != null) {
+          _getAllProducts();
+        }
+        break;
+      default:
+        Navigator.of(context)
+            .push(MaterialPageRoute(builder: (_) => const NotFoundPage()));
+    }
   }
 
   void _navigateAndCloseDrawer(MainPages destination,
@@ -95,6 +114,15 @@ class _AppScreenState extends State<AppScreen> {
   void _logout() {
     Provider.of<AuthProvider>(context, listen: false).logout();
   }
+
+  Widget _refreshProductIcon() => Consumer<ProductProvider>(
+        builder: (context, productProvider, child) => IconButton(
+          onPressed: () => _getAllProducts(),
+          icon: const Icon(Icons.refresh),
+          tooltip: 'Refresh',
+          color: AppTheme.appBarSecondaryColor,
+        ),
+      );
 
   Widget _cartIcon() => Consumer<CartProvider>(
         builder: (context, cartProvider, child) => Stack(
@@ -153,6 +181,11 @@ class _AppScreenState extends State<AppScreen> {
           actions: [
             Center(
                 child: Container(
+                    margin: const EdgeInsets.symmetric(vertical: 12.0),
+                    child:
+                        Builder(builder: (context) => _refreshProductIcon()))),
+            Center(
+                child: Container(
                     margin: const EdgeInsets.all(12.0),
                     child: Builder(builder: (context) => _cartIcon()))),
           ],
@@ -182,11 +215,6 @@ class _AppScreenState extends State<AppScreen> {
               ),
               const Divider(),
               DrawerListTile(
-                iconData: Icons.home,
-                text: 'Home',
-                onTap: () => _navigateAndCloseDrawer(MainPages.home),
-              ),
-              DrawerListTile(
                 iconData: Icons.add,
                 text: 'New product',
                 onTap: () => _navigateAndCloseDrawer(MainPages.newProduct,
@@ -210,17 +238,17 @@ class _AppScreenState extends State<AppScreen> {
 
   List<PopupMenuItem> _getPopupMenuItems() => [
         PopupMenuItem(
-          child: const Text('Home'),
-          onTap: () => _navigate(MainPages.home),
-        ),
-        PopupMenuItem(
             child: const Text('Profile'),
-            onTap: () =>
-                _navigate(MainPages.profile, args: {'id': currentUser.id!})),
+            onTap: () async {
+              await Future.delayed(const Duration(milliseconds: 1));
+              _navigate(MainPages.profile, args: {'id': currentUser.id!});
+            }),
         PopupMenuItem(
             child: const Text('New product'),
-            onTap: () =>
-                _navigate(MainPages.newProduct, args: {'id': currentUser.id!})),
+            onTap: () async {
+              await Future.delayed(const Duration(milliseconds: 1));
+              _navigate(MainPages.newProduct, args: {'id': currentUser.id!});
+            }),
         PopupMenuItem(child: const Text('Logout'), onTap: () => _logout())
       ];
 
@@ -235,6 +263,14 @@ class _AppScreenState extends State<AppScreen> {
           ),
           centerTitle: true,
           actions: [
+            Center(
+              child: Builder(
+                builder: (context) => _refreshProductIcon(),
+              ),
+            ),
+            const SizedBox(
+              width: 12,
+            ),
             Center(
               child: Builder(
                 builder: (context) => _cartIcon(),
