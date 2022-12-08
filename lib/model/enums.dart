@@ -1,3 +1,5 @@
+import 'package:flutter/material.dart';
+
 enum AuthMethod { login, register }
 
 enum UserWrapperType { userData, credentials, userDataWithCredentials }
@@ -54,4 +56,42 @@ extension ProductCategoriesExtension on ProductCategories {
 enum DeleteType {
   product,
   profile,
+}
+
+enum ProductDetailsMode {
+  edit,
+  preview,
+}
+
+extension ProductDetailsModeExtension on ProductDetailsMode {
+  String getText() {
+    switch (this) {
+      case ProductDetailsMode.edit:
+        return 'Edit';
+      case ProductDetailsMode.preview:
+        return 'Preview';
+      default:
+        return '';
+    }
+  }
+
+  IconData getIcon() {
+    switch (this) {
+      case ProductDetailsMode.edit:
+        return Icons.edit;
+      case ProductDetailsMode.preview:
+        return Icons.visibility_outlined;
+      default:
+        return Icons.question_mark;
+    }
+  }
+}
+
+enum TextFormatters {
+  header1,
+  header2,
+  header3,
+  bold,
+  italic,
+  underlined,
 }

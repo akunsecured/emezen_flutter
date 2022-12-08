@@ -6,7 +6,7 @@ class Product {
   final String sellerId;
   final double price;
   final List images;
-  final String details;
+  String details;
   final int quantity;
   final ProductCategories category;
 

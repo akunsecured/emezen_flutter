@@ -1,10 +1,12 @@
 import 'package:emezen/model/enums.dart';
 import 'package:emezen/model/product.dart';
 import 'package:emezen/provider/add_product_provider.dart';
+import 'package:emezen/provider/product_details_editor_provider.dart';
 import 'package:emezen/provider/product_provider.dart';
 import 'package:emezen/util/validation.dart';
 import 'package:emezen/widgets/bordered_text_field.dart';
 import 'package:emezen/widgets/loading_support_button.dart';
+import 'package:emezen/widgets/product_details_editor_widget.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
@@ -71,7 +73,8 @@ class _NewProductDialogState extends State<NewProductDialog> {
                             maxLines: 1,
                           ),
                           Container(
-                              margin: const EdgeInsets.symmetric(horizontal: 16),
+                              margin:
+                                  const EdgeInsets.symmetric(horizontal: 16),
                               width: double.infinity,
                               child: const Text('Select category')),
                           Container(
@@ -83,16 +86,19 @@ class _NewProductDialogState extends State<NewProductDialog> {
                                   addProductProvider.selectedCategory,
                               builder: (_, selectedCategory, __) =>
                                   DropdownButton(
-                                      value: addProductProvider.selectedCategory,
+                                      value:
+                                          addProductProvider.selectedCategory,
                                       items: ProductCategories.values
                                           .map((category) => DropdownMenuItem(
                                                 value: category,
                                                 child: Text(category.text),
                                               ))
                                           .toList(),
-                                      onChanged: (ProductCategories? category) =>
-                                          addProductProvider
-                                              .setSelectedCategory(category)),
+                                      onChanged:
+                                          (ProductCategories? category) =>
+                                              addProductProvider
+                                                  .setSelectedCategory(
+                                                      category)),
                             ),
                           ),
                           BorderedTextField(
@@ -111,6 +117,8 @@ class _NewProductDialogState extends State<NewProductDialog> {
                             numRegExp: Validation.numUntil999RegExp,
                             maxLines: 1,
                           ),
+                          const ProductDetailsEditorWidget(),
+                          /*
                           BorderedTextField(
                             addProductProvider.detailsController,
                             'Details',
@@ -119,9 +127,11 @@ class _NewProductDialogState extends State<NewProductDialog> {
                             maxLines: 10,
                             maxLength: 500,
                           ),
+                           */
                           Container(
                               width: double.infinity,
-                              margin: const EdgeInsets.symmetric(horizontal: 12),
+                              margin:
+                                  const EdgeInsets.symmetric(horizontal: 12),
                               child: ElevatedButton.icon(
                                 style: ElevatedButton.styleFrom(
                                     primary: Colors.white),
@@ -160,7 +170,8 @@ class _NewProductDialogState extends State<NewProductDialog> {
                                                       margin:
                                                           const EdgeInsets.all(
                                                               8.0),
-                                                      alignment: Alignment.center,
+                                                      alignment:
+                                                          Alignment.center,
                                                       decoration:
                                                           const BoxDecoration(
                                                         color: Colors.black38,
@@ -171,8 +182,8 @@ class _NewProductDialogState extends State<NewProductDialog> {
                                                       ),
                                                       child: ClipRRect(
                                                         borderRadius:
-                                                            BorderRadius.circular(
-                                                                24.0),
+                                                            BorderRadius
+                                                                .circular(24.0),
                                                         child: Image.memory(
                                                           image.bytes!,
                                                           fit: BoxFit.cover,
@@ -185,9 +196,8 @@ class _NewProductDialogState extends State<NewProductDialog> {
                                                       alignment:
                                                           Alignment.topRight,
                                                       child: Container(
-                                                        margin:
-                                                            const EdgeInsets.all(
-                                                                4.0),
+                                                        margin: const EdgeInsets
+                                                            .all(4.0),
                                                         child: IconButton(
                                                           color: Colors.red,
                                                           icon: const Icon(
@@ -226,16 +236,35 @@ class _NewProductDialogState extends State<NewProductDialog> {
                                     if (_newProductFormKey.currentState
                                             ?.validate() ??
                                         false) {
-                                      if (addProductProvider.images.isNotEmpty) {
-                                        Product product =
-                                            addProductProvider.getProduct();
-                                        await _productProvider.createProduct(
-                                            product, addProductProvider.images);
-                                        Navigator.of(context).pop(true);
+                                      if (Provider.of<
+                                                  ProductDetailsEditorProvider>(
+                                              context,
+                                              listen: false)
+                                          .productDetailsController
+                                          .text
+                                          .isNotEmpty) {
+                                        if (addProductProvider
+                                            .images.isNotEmpty) {
+                                          Product product =
+                                              addProductProvider.getProduct();
+                                          product.details = Provider.of<
+                                                      ProductDetailsEditorProvider>(
+                                                  context,
+                                                  listen: false)
+                                              .productDetailsController
+                                              .text;
+                                          await _productProvider.createProduct(
+                                              product,
+                                              addProductProvider.images);
+                                          Navigator.of(context).pop(true);
+                                        } else {
+                                          Fluttertoast.showToast(
+                                              msg:
+                                                  'At least 1 image must be selected');
+                                        }
                                       } else {
                                         Fluttertoast.showToast(
-                                            msg:
-                                                'At least 1 image must be selected');
+                                            msg: 'Details cannot be empty');
                                       }
                                     }
                                   },

@@ -41,6 +41,7 @@ dependencies:
   fluttertoast: ^8.0.9
   file_picker: ^5.2.2
   responsive_grid: ^2.1.0
+  styled_text: ^5.1.0
 
 dev_dependencies:
   flutter_test:

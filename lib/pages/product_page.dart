@@ -9,8 +9,8 @@ import 'package:emezen/style/app_theme.dart';
 import 'package:emezen/util/constants.dart';
 import 'package:emezen/widgets/app_image_widget.dart';
 import 'package:emezen/widgets/delete_dialog.dart';
+import 'package:emezen/widgets/product_details_styled_text.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 
 class ProductPage extends StatefulWidget {
@@ -155,7 +155,7 @@ class _ProductPageState extends State<ProductPage> {
                       ],
                     ),
                     const SizedBox(height: 24.0),
-                    Text(_product.details),
+                    ProductDetailsStyledText(_product.details),
                     Container(
                       alignment: Alignment.center,
                       margin: const EdgeInsets.only(top: 24.0),
@@ -237,7 +237,7 @@ class _ProductPageState extends State<ProductPage> {
                     ],
                   ),
                   const SizedBox(height: 24.0),
-                  Text(_product.details),
+                  ProductDetailsStyledText(_product.details),
                   Container(
                     alignment: Alignment.center,
                     margin: const EdgeInsets.only(top: 24.0),

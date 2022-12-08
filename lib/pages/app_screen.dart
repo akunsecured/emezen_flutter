@@ -6,6 +6,7 @@ import 'package:emezen/pages/error_page.dart';
 import 'package:emezen/pages/profile_page.dart';
 import 'package:emezen/provider/auth_provider.dart';
 import 'package:emezen/provider/cart_provider.dart';
+import 'package:emezen/provider/product_details_editor_provider.dart';
 import 'package:emezen/provider/product_provider.dart';
 import 'package:emezen/provider/profile_page_provider.dart';
 import 'package:emezen/style/app_theme.dart';
@@ -84,6 +85,8 @@ class _AppScreenState extends State<AppScreen> {
             builder: (_) => MultiProvider(
                   providers: [
                     ChangeNotifierProvider.value(value: productProvider),
+                    ChangeNotifierProvider(
+                        create: (_) => ProductDetailsEditorProvider()),
                   ],
                   child: NewProductDialog(userId: userId!),
                 ));
