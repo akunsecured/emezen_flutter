@@ -12,7 +12,6 @@ class AuthService extends BaseService {
     try {
       final response = await dio.post('/register', data: userWrapper.toJson());
       if (response.statusCode == 200) {
-        print(response.data);
         return WrappedToken.fromJson(response.data['message']);
       }
     } on DioError catch (e) {

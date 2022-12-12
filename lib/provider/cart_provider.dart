@@ -39,7 +39,6 @@ class CartProvider extends ChangeNotifier {
         clearCart();
       }
     } on ApiError catch (e) {
-      print(e);
       Utils.showMessage('Error: ${e.message}');
     }
 

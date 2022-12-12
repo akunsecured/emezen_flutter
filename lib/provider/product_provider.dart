@@ -235,7 +235,6 @@ class ProductProvider extends ProviderBase {
     try {
       String? token = await isLoggedIn();
       if (token != null) {
-        print(productObserver);
         return await _productService.updateProductObserver(
             productObserver!, token);
       }

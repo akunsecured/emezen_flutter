@@ -172,8 +172,6 @@ class ProductService extends BaseService {
         options: Options(headers: {'Authorization': 'Bearer $token'}),
       );
       if (response.statusCode == 200) {
-        print("getProductObserver");
-        print(response.data);
         if (response.data["message"] == null) {
           return null;
         }
