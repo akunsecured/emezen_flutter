@@ -3,11 +3,14 @@ import 'package:emezen/model/product.dart';
 import 'package:emezen/model/user.dart';
 import 'package:emezen/provider/auth_provider.dart';
 import 'package:emezen/provider/cart_provider.dart';
+import 'package:emezen/provider/product_details_editor_provider.dart';
 import 'package:emezen/provider/product_page_provider.dart';
 import 'package:emezen/provider/product_provider.dart';
 import 'package:emezen/style/app_theme.dart';
 import 'package:emezen/util/constants.dart';
+import 'package:emezen/util/utils.dart';
 import 'package:emezen/widgets/app_image_widget.dart';
+import 'package:emezen/widgets/create_edit_product_dialog.dart';
 import 'package:emezen/widgets/delete_dialog.dart';
 import 'package:emezen/widgets/product_details_styled_text.dart';
 import 'package:flutter/material.dart';
@@ -174,8 +177,33 @@ class _ProductPageState extends State<ProductPage> {
                                                   .addToCart(_product),
                                           child: const Text("Add to cart")),
                                 )
-                              : const ElevatedButton(
-                                  onPressed: null, child: Text("Out of stock")))
+                              : Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Container(
+                                      margin: const EdgeInsets.only(right: 8.0),
+                                      child: const ElevatedButton(
+                                          onPressed: null,
+                                          child: Text("Out of stock")),
+                                    ),
+                                    Consumer<ProductProvider>(
+                                      builder: (_, productProvider, __) =>
+                                          ElevatedButton(
+                                              onPressed: () => Provider.of<
+                                                          ProductProvider>(
+                                                      context,
+                                                      listen: false)
+                                                  .addOrRemoveProductToObserver(
+                                                      _product.id!),
+                                              child: Text(productProvider
+                                                      .productObserver!
+                                                      .productList
+                                                      .contains(_product.id!)
+                                                  ? "Remove observer"
+                                                  : "Add observer")),
+                                    ),
+                                  ],
+                                ))
                           : const SizedBox(),
                     )
                   ],
@@ -256,8 +284,33 @@ class _ProductPageState extends State<ProductPage> {
                                                 .addToCart(_product),
                                         child: const Text("Add to cart")),
                               )
-                            : const ElevatedButton(
-                                onPressed: null, child: Text("Out of stock")))
+                            : Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Container(
+                                    margin: const EdgeInsets.only(right: 8.0),
+                                    child: const ElevatedButton(
+                                        onPressed: null,
+                                        child: Text("Out of stock")),
+                                  ),
+                                  Consumer<ProductProvider>(
+                                    builder: (_, productProvider, __) =>
+                                        ElevatedButton(
+                                            onPressed: () => Provider.of<
+                                                        ProductProvider>(
+                                                    context,
+                                                    listen: false)
+                                                .addOrRemoveProductToObserver(
+                                                    _product.id!),
+                                            child: Text(productProvider
+                                                    .productObserver!
+                                                    .productList
+                                                    .contains(_product.id!)
+                                                ? "Remove observer"
+                                                : "Add observer")),
+                                  ),
+                                ],
+                              ))
                         : const SizedBox(),
                   )
                 ],
@@ -285,7 +338,32 @@ class _ProductPageState extends State<ProductPage> {
                   Container(
                     margin: const EdgeInsets.only(right: 6.0),
                     child: IconButton(
-                        onPressed: () async {},
+                        onPressed: () async {
+                          String? userId = await Provider.of<ProductProvider>(
+                                  context,
+                                  listen: false)
+                              .getCurrentUserId();
+                          var result = await showDialog(
+                              context: context,
+                              builder: (_) => MultiProvider(
+                                    providers: [
+                                      ChangeNotifierProvider.value(
+                                          value: Provider.of<ProductProvider>(
+                                              context,
+                                              listen: false)),
+                                      ChangeNotifierProvider(
+                                          create: (_) =>
+                                              ProductDetailsEditorProvider()),
+                                    ],
+                                    child: CreateEditProductDialog(
+                                      userId: userId!,
+                                      product: _product,
+                                    ),
+                                  ));
+                          if (result != null) {
+                            Navigator.of(context).pop(true);
+                          }
+                        },
                         tooltip: 'Edit product',
                         icon: const Icon(Icons.edit)),
                   ),
@@ -306,6 +384,8 @@ class _ProductPageState extends State<ProductPage> {
                                         deleteType: DeleteType.product),
                                   ));
                           if (success ?? false) {
+                            Utils.showMessage(
+                                'Product successfully deleted', false);
                             Navigator.of(context).pop(success);
                           }
                         },

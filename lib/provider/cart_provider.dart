@@ -1,9 +1,8 @@
-import 'package:emezen/model/enums.dart';
 import 'package:emezen/model/product.dart';
 import 'package:emezen/network/product_service.dart';
 import 'package:emezen/util/errors.dart';
+import 'package:emezen/util/utils.dart';
 import 'package:flutter/foundation.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 
 class CartProvider extends ChangeNotifier {
   late final ProductService _productService;
@@ -26,7 +25,7 @@ class CartProvider extends ChangeNotifier {
 
   Future<void> checkout(String token) async {
     if (_cart.isEmpty) {
-      Fluttertoast.showToast(msg: 'Shopping cart is empty!');
+      Utils.showMessage('Shopping cart is empty');
       return;
     }
 
@@ -36,12 +35,12 @@ class CartProvider extends ChangeNotifier {
       bool success = await _productService.buyProducts(
           _cart.map((product, quantity) => MapEntry(product.id!, quantity)), token);
       if (success) {
-        Fluttertoast.showToast(msg: "Successful purchase");
+        Utils.showMessage('Successful purchase', false);
         clearCart();
       }
     } on ApiError catch (e) {
       print(e);
-      Fluttertoast.showToast(msg: "Error: ${e.message}");
+      Utils.showMessage('Error: ${e.message}');
     }
 
     _changeLoadingStatus();

@@ -4,9 +4,9 @@ class WrappedToken {
 
   WrappedToken({required this.accessToken, required this.refreshToken});
 
-  factory WrappedToken.fromJson(Map<String, String> json) => WrappedToken(
+  factory WrappedToken.fromJson(Map<String, dynamic> json) => WrappedToken(
       accessToken: json['access_token']!, refreshToken: json['refresh_token']!);
 
-  Map<String, String> toJson() =>
+  Map<String, dynamic> toJson() =>
       {'access_token': accessToken, 'refresh_token': refreshToken};
 }

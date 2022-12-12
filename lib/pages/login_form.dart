@@ -1,6 +1,7 @@
 import 'package:emezen/model/enums.dart';
 import 'package:emezen/model/user.dart';
 import 'package:emezen/provider/auth_provider.dart';
+import 'package:emezen/provider/cart_provider.dart';
 import 'package:emezen/util/validation.dart';
 import 'package:emezen/widgets/bordered_text_field.dart';
 import 'package:emezen/widgets/loading_support_button.dart';
@@ -67,6 +68,9 @@ class _LoginFormState extends State<LoginForm> {
                           onPressed: () async {
                             if (_loginFormKey.currentState?.validate() ??
                                 false) {
+                              Provider.of<CartProvider>(context, listen: false)
+                                  .cart
+                                  .clear();
                               await Provider.of<AuthProvider>(context,
                                       listen: false)
                                   .submit(UserWrapper(

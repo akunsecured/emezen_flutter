@@ -5,11 +5,10 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 class DeleteDialog extends StatelessWidget {
-  final String id;
+  final String? id;
   final DeleteType deleteType;
 
-  const DeleteDialog(
-      {Key? key, required this.id, required this.deleteType})
+  const DeleteDialog({Key? key, this.id, required this.deleteType})
       : super(key: key);
 
   @override
@@ -24,11 +23,9 @@ class DeleteDialog extends StatelessWidget {
           titleType = 'profile';
           contentType = 'your profile';
           onPressed = () {
-            // TODO
-            /*Provider.of<AuthProvider>(context, listen: false)
-                .deleteUser(id)
-                .then((_) =>
-                Navigator.of(context).popUntil((route) => route.isFirst));*/
+            Provider.of<AuthProvider>(context, listen: false).deleteUser().then(
+                (_) =>
+                    Navigator.of(context).popUntil((route) => route.isFirst));
           };
 
           break;
@@ -39,7 +36,7 @@ class DeleteDialog extends StatelessWidget {
           contentType = 'this product';
           onPressed = () {
             Provider.of<ProductProvider>(context, listen: false)
-                .deleteProduct(id)
+                .deleteProduct(id!)
                 .then((success) => Navigator.of(context).pop(success));
           };
 

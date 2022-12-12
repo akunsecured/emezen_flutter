@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:emezen/model/product.dart';
+import 'package:emezen/model/product_observer.dart';
 import 'package:emezen/model/search_filter.dart';
 import 'package:emezen/network/base_service.dart';
 import 'package:file_picker/file_picker.dart';
@@ -72,7 +73,6 @@ class ProductService extends BaseService {
           queryParameters: queryParameters,
           options: Options(headers: {'Authorization': 'Bearer $token'}));
       if (response.statusCode == 200) {
-        print(response.data['message']);
         List<Product> products = [];
         if (response.data['message'] != null) {
           for (var element in response.data['message']) {
@@ -105,7 +105,6 @@ class ProductService extends BaseService {
       final response = await dio.get('/get_all/$id',
           options: Options(headers: {'Authorization': 'Bearer $token'}));
       if (response.statusCode == 200) {
-        print(response.data);
         List<Product> products = [];
         if (response.data['message'] != null) {
           for (var element in response.data['message']) {
@@ -127,7 +126,22 @@ class ProductService extends BaseService {
           options: Options(headers: {'Authorization': 'Bearer $token'}),
           data: productsWithCount);
       if (response.statusCode == 200) {
-        print(response.data);
+        return true;
+      }
+    } on DioError catch (e) {
+      handleNetworkError(e);
+    }
+    return false;
+  }
+
+  Future<bool> editProduct(Product product, String token) async {
+    try {
+      final response = await dio.put(
+        '/update/${product.id}',
+        data: product.toJson(),
+        options: Options(headers: {'Authorization': 'Bearer $token'}),
+      );
+      if (response.statusCode == 200) {
         return true;
       }
     } on DioError catch (e) {
@@ -143,12 +157,48 @@ class ProductService extends BaseService {
         options: Options(headers: {'Authorization': 'Bearer $token'}),
       );
       if (response.statusCode == 200) {
-        print(response.data);
         return true;
       }
     } on DioError catch (e) {
       handleNetworkError(e);
     }
     return false;
+  }
+
+  Future<ProductObserver?> getProductObserver(String token) async {
+    try {
+      final response = await dio.get(
+        '/observer',
+        options: Options(headers: {'Authorization': 'Bearer $token'}),
+      );
+      if (response.statusCode == 200) {
+        print("getProductObserver");
+        print(response.data);
+        if (response.data["message"] == null) {
+          return null;
+        }
+        return ProductObserver.fromJson(response.data["message"]);
+      }
+    } on DioError catch (e) {
+      handleNetworkError(e);
+    }
+    return null;
+  }
+
+  Future<ProductObserver?> updateProductObserver(
+      ProductObserver productObserver, String token) async {
+    try {
+      final response = await dio.put(
+        '/observer',
+        data: productObserver.toJson(),
+        options: Options(headers: {'Authorization': 'Bearer $token'}),
+      );
+      if (response.statusCode == 200) {
+        return ProductObserver.fromJson(response.data["message"]);
+      }
+    } on DioError catch (e) {
+      handleNetworkError(e);
+    }
+    return null;
   }
 }

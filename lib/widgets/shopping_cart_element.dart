@@ -69,7 +69,7 @@ class ShoppingCartElement extends StatelessWidget {
                     ],
                   ),
                   Text(
-                    '\$${product.price * cartProvider.cart[product]!}',
+                    '\$${(product.price * cartProvider.cart[product]!).toStringAsFixed(2)}',
                     style: const TextStyle(fontWeight: FontWeight.bold),
                     textAlign: TextAlign.right,
                   ),

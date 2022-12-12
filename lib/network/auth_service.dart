@@ -12,6 +12,7 @@ class AuthService extends BaseService {
     try {
       final response = await dio.post('/register', data: userWrapper.toJson());
       if (response.statusCode == 200) {
+        print(response.data);
         return WrappedToken.fromJson(response.data['message']);
       }
     } on DioError catch (e) {
@@ -58,5 +59,19 @@ class AuthService extends BaseService {
       handleNetworkError(e);
     }
     return null;
+  }
+
+  Future<bool> deleteUser(String token) async {
+    try {
+      final response = await dio.delete('/delete',
+          options: Options(headers: {'Authorization': 'Bearer $token'}));
+
+      if (response.statusCode == 204) {
+        return true;
+      }
+    } on DioError catch (e) {
+      handleNetworkError(e);
+    }
+    return false;
   }
 }

@@ -1,6 +1,6 @@
 import 'package:emezen/model/enums.dart';
 import 'package:emezen/model/product.dart';
-import 'package:emezen/provider/add_product_provider.dart';
+import 'package:emezen/provider/create_edit_product_provider.dart';
 import 'package:emezen/provider/product_details_editor_provider.dart';
 import 'package:emezen/provider/product_provider.dart';
 import 'package:emezen/util/validation.dart';
@@ -13,16 +13,22 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:provider/provider.dart';
 import 'package:responsive_grid/responsive_grid.dart';
 
-class NewProductDialog extends StatefulWidget {
+class CreateEditProductDialog extends StatefulWidget {
   final String userId;
+  final Product? product;
 
-  const NewProductDialog({Key? key, required this.userId}) : super(key: key);
+  const CreateEditProductDialog({
+    Key? key,
+    required this.userId,
+    this.product,
+  }) : super(key: key);
 
   @override
-  State<NewProductDialog> createState() => _NewProductDialogState();
+  State<CreateEditProductDialog> createState() =>
+      _CreateEditProductDialogState();
 }
 
-class _NewProductDialogState extends State<NewProductDialog> {
+class _CreateEditProductDialogState extends State<CreateEditProductDialog> {
   final GlobalKey<FormState> _newProductFormKey = GlobalKey();
 
   late final ProductProvider _productProvider;
@@ -30,16 +36,33 @@ class _NewProductDialogState extends State<NewProductDialog> {
   @override
   void initState() {
     super.initState();
+
     _productProvider = Provider.of<ProductProvider>(context, listen: false);
   }
 
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
-        create: (_) => AddProductProvider(widget.userId),
+        create: (_) => CreateEditProductProvider(widget.userId),
         builder: (context, _) {
-          AddProductProvider addProductProvider =
-              Provider.of<AddProductProvider>(context, listen: false);
+          CreateEditProductProvider createEditProductProvider =
+              Provider.of<CreateEditProductProvider>(context, listen: false);
+
+          if (widget.product != null) {
+            createEditProductProvider.nameController.text =
+                widget.product!.name;
+            createEditProductProvider.detailsController.text =
+                widget.product!.details;
+            createEditProductProvider.priceController.text =
+                widget.product!.price.toString();
+            createEditProductProvider.quantityController.text =
+                widget.product!.quantity.toString();
+            createEditProductProvider
+                .setSelectedCategory(widget.product!.category);
+            createEditProductProvider.imageUrls =
+                widget.product!.images.map((image) => image as String).toList();
+          }
+
           return Dialog(
             backgroundColor: Colors.transparent,
             child: Container(
@@ -59,14 +82,16 @@ class _NewProductDialogState extends State<NewProductDialog> {
                         children: [
                           Container(
                             margin: const EdgeInsets.only(top: 16, bottom: 32),
-                            child: const Text(
-                              'Create new product',
-                              style: TextStyle(
+                            child: Text(
+                              widget.product != null
+                                  ? 'Edit product'
+                                  : 'Create new product',
+                              style: const TextStyle(
                                   fontSize: 24, fontWeight: FontWeight.bold),
                             ),
                           ),
                           BorderedTextField(
-                            addProductProvider.nameController,
+                            createEditProductProvider.nameController,
                             "Product's name",
                             TextInputType.name,
                             validateFun: Validation.validatePartOfName,
@@ -80,14 +105,14 @@ class _NewProductDialogState extends State<NewProductDialog> {
                           Container(
                             margin: const EdgeInsets.symmetric(horizontal: 16),
                             width: double.infinity,
-                            child:
-                                Selector<AddProductProvider, ProductCategories>(
-                              selector: (_, addProductProvider) =>
-                                  addProductProvider.selectedCategory,
+                            child: Selector<CreateEditProductProvider,
+                                ProductCategories>(
+                              selector: (_, createEditProductProvider) =>
+                                  createEditProductProvider.selectedCategory,
                               builder: (_, selectedCategory, __) =>
                                   DropdownButton(
-                                      value:
-                                          addProductProvider.selectedCategory,
+                                      value: createEditProductProvider
+                                          .selectedCategory,
                                       items: ProductCategories.values
                                           .map((category) => DropdownMenuItem(
                                                 value: category,
@@ -96,13 +121,13 @@ class _NewProductDialogState extends State<NewProductDialog> {
                                           .toList(),
                                       onChanged:
                                           (ProductCategories? category) =>
-                                              addProductProvider
+                                              createEditProductProvider
                                                   .setSelectedCategory(
                                                       category)),
                             ),
                           ),
                           BorderedTextField(
-                            addProductProvider.priceController,
+                            createEditProductProvider.priceController,
                             "Price",
                             TextInputType.number,
                             validateFun: Validation.validatePrice,
@@ -110,25 +135,20 @@ class _NewProductDialogState extends State<NewProductDialog> {
                             maxLines: 1,
                           ),
                           BorderedTextField(
-                            addProductProvider.quantityController,
+                            createEditProductProvider.quantityController,
                             'Quantity',
                             TextInputType.number,
                             validateFun: Validation.validateQuantity,
                             numRegExp: Validation.numUntil999RegExp,
                             maxLines: 1,
                           ),
-                          const ProductDetailsEditorWidget(),
-                          /*
-                          BorderedTextField(
-                            addProductProvider.detailsController,
-                            'Details',
-                            TextInputType.multiline,
-                            validateFun: Validation.validateDetails,
-                            maxLines: 10,
-                            maxLength: 500,
+                          ProductDetailsEditorWidget(
+                            text: widget.product != null
+                                ? widget.product!.details
+                                : null,
                           ),
-                           */
-                          Container(
+                          if (widget.product == null)
+                            Container(
                               width: double.infinity,
                               margin:
                                   const EdgeInsets.symmetric(horizontal: 12),
@@ -144,15 +164,18 @@ class _NewProductDialogState extends State<NewProductDialog> {
                                   );
 
                                   if (result != null) {
-                                    addProductProvider.setImages(result.files);
+                                    createEditProductProvider
+                                        .setImages(result.files);
                                   }
 
                                   setState(() {});
                                 },
                                 label: const Text('Choose files'),
                                 icon: const Icon(Icons.folder),
-                              )),
-                          Selector<AddProductProvider, List<PlatformFile>>(
+                              ),
+                            ),
+                          Selector<CreateEditProductProvider,
+                                  List<PlatformFile>>(
                               selector: (_, addProductProvider) =>
                                   addProductProvider.images,
                               builder: (_, images, __) => ResponsiveGridRow(
@@ -206,7 +229,7 @@ class _NewProductDialogState extends State<NewProductDialog> {
                                                           ),
                                                           tooltip: 'Remove',
                                                           onPressed: () {
-                                                            addProductProvider
+                                                            createEditProductProvider
                                                                 .removeImage(
                                                                     image);
                                                           },
@@ -231,7 +254,9 @@ class _NewProductDialogState extends State<NewProductDialog> {
                                 builder: (_, isLoading, __) =>
                                     LoadingSupportButton(
                                   isLoading: isLoading,
-                                  text: 'Add product',
+                                  text: widget.product != null
+                                      ? 'Edit product'
+                                      : 'Add product',
                                   onPressed: () async {
                                     if (_newProductFormKey.currentState
                                             ?.validate() ??
@@ -243,24 +268,42 @@ class _NewProductDialogState extends State<NewProductDialog> {
                                           .productDetailsController
                                           .text
                                           .isNotEmpty) {
-                                        if (addProductProvider
-                                            .images.isNotEmpty) {
-                                          Product product =
-                                              addProductProvider.getProduct();
-                                          product.details = Provider.of<
-                                                      ProductDetailsEditorProvider>(
-                                                  context,
-                                                  listen: false)
-                                              .productDetailsController
-                                              .text;
-                                          await _productProvider.createProduct(
-                                              product,
-                                              addProductProvider.images);
-                                          Navigator.of(context).pop(true);
+                                        if (widget.product == null) {
+                                          if (createEditProductProvider
+                                              .images.isNotEmpty) {
+                                            Product product =
+                                                createEditProductProvider
+                                                    .getProduct();
+                                            product.details = Provider.of<
+                                                        ProductDetailsEditorProvider>(
+                                                    context,
+                                                    listen: false)
+                                                .productDetailsController
+                                                .text;
+                                            await _productProvider
+                                                .createProduct(
+                                                    product,
+                                                    createEditProductProvider
+                                                        .images);
+                                            Navigator.of(context).pop(true);
+                                          } else {
+                                            Fluttertoast.showToast(
+                                                msg:
+                                                    'At least 1 image must be selected');
+                                          }
                                         } else {
-                                          Fluttertoast.showToast(
-                                              msg:
-                                                  'At least 1 image must be selected');
+                                          Product product =
+                                              createEditProductProvider
+                                                  .getProduct();
+                                          product.id = widget.product!.id;
+                                          product.images =
+                                              widget.product!.images;
+
+                                          bool success = await _productProvider
+                                              .editProduct(product);
+                                          if (success) {
+                                            Navigator.of(context).pop(true);
+                                          }
                                         }
                                       } else {
                                         Fluttertoast.showToast(

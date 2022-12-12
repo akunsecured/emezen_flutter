@@ -5,7 +5,9 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 class ProductDetailsEditorWidget extends StatefulWidget {
-  const ProductDetailsEditorWidget({Key? key}) : super(key: key);
+  final String? text;
+
+  const ProductDetailsEditorWidget({Key? key, this.text}) : super(key: key);
 
   @override
   State<ProductDetailsEditorWidget> createState() =>
@@ -14,6 +16,17 @@ class ProductDetailsEditorWidget extends StatefulWidget {
 
 class _ProductDetailsEditorWidgetState
     extends State<ProductDetailsEditorWidget> {
+  @override
+  void initState() {
+    super.initState();
+
+    if (widget.text != null) {
+      Provider.of<ProductDetailsEditorProvider>(context, listen: false)
+          .productDetailsController
+          .text = widget.text!;
+    }
+  }
+
   @override
   Widget build(BuildContext context) => Consumer<ProductDetailsEditorProvider>(
         builder: (_, productDetailsEditorProvider, __) =>
@@ -88,6 +101,7 @@ class _ProductDetailsEditorWidgetState
                 color: Colors.transparent,
                 child: TextField(
                     maxLines: 20,
+                    maxLength: 1500,
                     controller: Provider.of<ProductDetailsEditorProvider>(
                             context,
                             listen: false)

@@ -34,8 +34,6 @@ class _RegisterFormState extends State<RegisterForm> {
     _emailController = TextEditingController();
     _passwordController = TextEditingController();
     _confirmPasswordController = TextEditingController();
-
-    print(Provider.of<AuthProvider>(context, listen: false).ping);
   }
 
   @override

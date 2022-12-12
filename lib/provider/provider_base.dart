@@ -1,7 +1,7 @@
 import 'package:emezen/network/auth_service.dart';
 import 'package:emezen/util/errors.dart';
+import 'package:emezen/util/utils.dart';
 import 'package:flutter/foundation.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 import 'package:jwt_io/jwt_io.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -48,8 +48,7 @@ abstract class ProviderBase extends ChangeNotifier {
       await saveAccessToken(accessToken!);
       return accessToken;
     } on ApiError catch (e) {
-      print(e);
-      Fluttertoast.showToast(msg: "Error: ${e.message}");
+      Utils.showMessage('Error: ${e.message}');
     }
     return null;
   }
@@ -80,7 +79,7 @@ abstract class ProviderBase extends ChangeNotifier {
 
     if (token != null) {
       Map<String, dynamic> tokenPayload = JwtToken.payload(token);
-      return tokenPayload['userId'];
+      return tokenPayload['user']['_id'];
     }
 
     return null;

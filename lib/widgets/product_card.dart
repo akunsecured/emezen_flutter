@@ -41,7 +41,7 @@ class ProductCard extends StatelessWidget {
               imageWidget,
               Text(
                 product.name,
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
               ),
               Text("Price: \$${product.price}"),
             ],

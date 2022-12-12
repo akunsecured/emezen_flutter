@@ -13,12 +13,9 @@ class ShoppingCartDialog extends StatefulWidget {
 }
 
 class _ShoppingCartDialogState extends State<ShoppingCartDialog> {
-  late final AuthProvider _authProvider;
-
   @override
   void initState() {
     super.initState();
-    _authProvider = Provider.of<AuthProvider>(context, listen: false);
   }
 
   @override

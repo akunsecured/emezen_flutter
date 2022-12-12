@@ -8,11 +8,10 @@ import 'package:emezen/provider/auth_provider.dart';
 import 'package:emezen/provider/cart_provider.dart';
 import 'package:emezen/provider/product_details_editor_provider.dart';
 import 'package:emezen/provider/product_provider.dart';
-import 'package:emezen/provider/profile_page_provider.dart';
 import 'package:emezen/style/app_theme.dart';
 import 'package:emezen/util/constants.dart';
 import 'package:emezen/widgets/drawer_list_tile.dart';
-import 'package:emezen/widgets/new_product_dialog.dart';
+import 'package:emezen/widgets/create_edit_product_dialog.dart';
 import 'package:emezen/widgets/shopping_cart_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -39,9 +38,13 @@ class _AppScreenState extends State<AppScreen> {
     _body = const HomePage();
   }
 
-  // TODO: termékfigyelő notificationként az alkalmazás tetején, formázás a termékleírásra
-  void _getAllProducts() =>
-      Provider.of<ProductProvider>(context, listen: false).getAllProducts();
+  Future<void> _reloadData() async {
+    await Provider.of<ProductProvider>(context, listen: false).getAllProducts();
+    await Provider.of<ProductProvider>(context, listen: false)
+        .getProductObserver();
+    await Provider.of<ProductProvider>(context, listen: false)
+        .getFilledProducts();
+  }
 
   Future<void> _navigate(MainPages destination,
       {Map<String, dynamic> args = const {}}) async {
@@ -49,8 +52,6 @@ class _AppScreenState extends State<AppScreen> {
         Provider.of<AuthProvider>(context, listen: false);
     ProductProvider productProvider =
         Provider.of<ProductProvider>(context, listen: false);
-    ProfilePageProvider profilePageProvider =
-        Provider.of<ProfilePageProvider>(context, listen: false);
     CartProvider cartProvider =
         Provider.of<CartProvider>(context, listen: false);
 
@@ -65,7 +66,6 @@ class _AppScreenState extends State<AppScreen> {
             providers: [
               ChangeNotifierProvider.value(value: authProvider),
               ChangeNotifierProvider.value(value: productProvider),
-              ChangeNotifierProvider.value(value: profilePageProvider),
               ChangeNotifierProvider.value(value: cartProvider),
             ],
             child: ProfilePage(userId: userId),
@@ -88,10 +88,10 @@ class _AppScreenState extends State<AppScreen> {
                     ChangeNotifierProvider(
                         create: (_) => ProductDetailsEditorProvider()),
                   ],
-                  child: NewProductDialog(userId: userId!),
+                  child: CreateEditProductDialog(userId: userId!),
                 ));
         if (result != null) {
-          _getAllProducts();
+          _reloadData();
         }
         break;
       default:
@@ -118,9 +118,9 @@ class _AppScreenState extends State<AppScreen> {
     Provider.of<AuthProvider>(context, listen: false).logout();
   }
 
-  Widget _refreshProductIcon() => Consumer<ProductProvider>(
+  Widget _refreshIcon() => Consumer<ProductProvider>(
         builder: (context, productProvider, child) => IconButton(
-          onPressed: () => _getAllProducts(),
+          onPressed: () => _reloadData(),
           icon: const Icon(Icons.refresh),
           tooltip: 'Refresh',
           color: AppTheme.appBarSecondaryColor,
@@ -185,8 +185,7 @@ class _AppScreenState extends State<AppScreen> {
             Center(
                 child: Container(
                     margin: const EdgeInsets.symmetric(vertical: 12.0),
-                    child:
-                        Builder(builder: (context) => _refreshProductIcon()))),
+                    child: Builder(builder: (context) => _refreshIcon()))),
             Center(
                 child: Container(
                     margin: const EdgeInsets.all(12.0),
@@ -268,7 +267,7 @@ class _AppScreenState extends State<AppScreen> {
           actions: [
             Center(
               child: Builder(
-                builder: (context) => _refreshProductIcon(),
+                builder: (context) => _refreshIcon(),
               ),
             ),
             const SizedBox(

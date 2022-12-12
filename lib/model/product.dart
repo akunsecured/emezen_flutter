@@ -1,11 +1,11 @@
 import 'package:emezen/model/enums.dart';
 
 class Product {
-  final String? id;
+  String? id;
   final String name;
   final String sellerId;
   final double price;
-  final List images;
+  List images;
   String details;
   final int quantity;
   final ProductCategories category;

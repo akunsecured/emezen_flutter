@@ -7,8 +7,8 @@ import 'package:emezen/network/auth_service.dart';
 import 'package:emezen/network/user_service.dart';
 import 'package:emezen/provider/provider_base.dart';
 import 'package:emezen/util/errors.dart';
+import 'package:emezen/util/utils.dart';
 import 'package:file_picker/file_picker.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 import 'package:jwt_io/jwt_io.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -16,12 +16,6 @@ class AuthProvider extends ProviderBase {
   late final AuthService _authService;
   late final UserService _userService;
   late final SharedPreferences _sharedPreferences;
-
-  bool _isLoading = false;
-
-  bool get isLoading => _isLoading;
-
-  String get ping => "pong";
 
   AuthMethod _authMethod = AuthMethod.login;
 
@@ -37,8 +31,8 @@ class AuthProvider extends ProviderBase {
     if (_currentUser != null) return _currentUser;
 
     User? user;
-    getCurrentUser().then((usr) {
-      user = usr;
+    getCurrentUser().then((u) {
+      user = u;
     });
     return user;
   }
@@ -55,18 +49,13 @@ class AuthProvider extends ProviderBase {
     isLoggedIn();
   }
 
-  void _changeLoadingStatus() {
-    _isLoading = !_isLoading;
-    if (!isDisposed) notifyListeners();
-  }
-
   void changeAuthMethod(AuthMethod method) {
     _authMethod = method;
     if (!isDisposed) notifyListeners();
   }
 
   Future<bool> submit(UserWrapper userWrapper) async {
-    _changeLoadingStatus();
+    changeLoadingStatus();
 
     WrappedToken? tokens;
     bool success = false;
@@ -81,8 +70,7 @@ class AuthProvider extends ProviderBase {
         success = await _saveWrappedToken(tokens!);
       }
     } on ApiError catch (e) {
-      print(e);
-      Fluttertoast.showToast(msg: "Error: ${e.message}");
+      Utils.showMessage('Error: ${e.message}');
     }
 
     if (success) {
@@ -90,7 +78,7 @@ class AuthProvider extends ProviderBase {
           .add(User.fromJson(JwtToken.payload(tokens!.accessToken)['user']));
     }
 
-    _changeLoadingStatus();
+    changeLoadingStatus();
     return success;
   }
 
@@ -127,29 +115,56 @@ class AuthProvider extends ProviderBase {
   }
 
   Future<User?> getCurrentUser() async {
+    _currentUser = null;
+
+    await Future.delayed(const Duration(milliseconds: 250));
+    changeLoadingStatus();
+
     try {
       String? token = await isLoggedIn();
       if (token != null) {
         _currentUser = await _authService.getCurrentUser(token);
-        return _currentUser;
       }
     } on ApiError catch (e) {
-      print(e);
-      Fluttertoast.showToast(msg: "Error: ${e.message}");
+      Utils.showMessage('Error: ${e.message}');
     }
 
-    return null;
+    changeLoadingStatus();
+    return _currentUser;
+  }
+
+  Future<bool> deleteUser() async {
+    bool success = false;
+
+    try {
+      String? token = await isLoggedIn();
+      if (token != null) {
+        success = await _authService.deleteUser(token);
+
+        if (success) {
+          await removeAccessToken();
+          await removeRefreshToken();
+          _userController.add(null);
+
+          Utils.showMessage('Profile successfully deleted', false);
+        }
+      }
+    } on ApiError catch (e) {
+      Utils.showMessage('Error: ${e.message}');
+    }
+
+    return success;
   }
 
   Future<void> logout() async {
-    _changeLoadingStatus();
+    changeLoadingStatus();
 
     await removeAccessToken();
     await removeRefreshToken();
 
     _userController.add(null);
 
-    _changeLoadingStatus();
+    changeLoadingStatus();
   }
 
   Future<User?> getUser(String id) async {
@@ -159,7 +174,7 @@ class AuthProvider extends ProviderBase {
         return await _userService.getUser(id: id, token: token);
       }
     } on ApiError catch (e) {
-      Fluttertoast.showToast(msg: "Error: ${e.message}");
+      Utils.showMessage('Error: ${e.message}');
     }
 
     return null;
@@ -173,7 +188,7 @@ class AuthProvider extends ProviderBase {
             id: id, token: token, image: image);
       }
     } on ApiError catch (e) {
-      Fluttertoast.showToast(msg: "Error: ${e.message}");
+      Utils.showMessage('Error: ${e.message}');
     }
 
     return null;

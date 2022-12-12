@@ -1,12 +1,13 @@
 import 'package:emezen/model/enums.dart';
 import 'package:emezen/model/product.dart';
+import 'package:emezen/model/product_observer.dart';
 import 'package:emezen/model/search_filter.dart';
 import 'package:emezen/network/auth_service.dart';
 import 'package:emezen/network/product_service.dart';
 import 'package:emezen/provider/provider_base.dart';
 import 'package:emezen/util/errors.dart';
+import 'package:emezen/util/utils.dart';
 import 'package:file_picker/file_picker.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class ProductProvider extends ProviderBase {
@@ -15,7 +16,8 @@ class ProductProvider extends ProviderBase {
   final SearchFilter _searchFilter = SearchFilter();
 
   final List<Product> _products = [];
-  final List<Product> _filteredProducts = [];
+  final List<Product> _filledProducts = [];
+  final List<Product> _userProducts = [];
 
   String? _searchTitle;
   double? _priceFrom;
@@ -23,9 +25,13 @@ class ProductProvider extends ProviderBase {
 
   List<Product> get products => _products;
 
-  List<Product> get filteredProducts => _filteredProducts;
+  List<Product> get filledProducts => _filledProducts;
+
+  List<Product> get userProducts => _userProducts;
 
   List<ProductCategories> get categories => ProductCategories.values;
+
+  ProductObserver? productObserver;
 
   ProductProvider(this._productService, AuthService authService,
       SharedPreferences sharedPreferences)
@@ -99,8 +105,7 @@ class ProductProvider extends ProviderBase {
         }
       }
     } on ApiError catch (e) {
-      print(e);
-      Fluttertoast.showToast(msg: "Error: ${e.message}");
+      Utils.showMessage('Error: ${e.message}');
     }
 
     changeLoadingStatus();
@@ -108,8 +113,9 @@ class ProductProvider extends ProviderBase {
   }
 
   Future<void> getAllProducts() async {
-    _products.clear();
     changeLoadingStatus();
+
+    _products.clear();
 
     try {
       String? token = await isLoggedIn();
@@ -123,8 +129,7 @@ class ProductProvider extends ProviderBase {
         _products.addAll(products);
       }
     } on ApiError catch (e) {
-      print(e);
-      Fluttertoast.showToast(msg: "Error: ${e.message}");
+      Utils.showMessage('Error: ${e.message}');
     }
 
     changeLoadingStatus();
@@ -138,27 +143,49 @@ class ProductProvider extends ProviderBase {
         return await _productService.getProduct(id, token);
       }
     } on ApiError catch (e) {
-      print(e);
-      Fluttertoast.showToast(msg: "Error: ${e.message}");
+      Utils.showMessage('Error: ${e.message}');
     }
 
     return null;
   }
 
-  Future<List<Product>> getAllProductsOfUser(String id) async {
-    List<Product> products = [];
+  Future<void> getAllProductsOfUser(String id) async {
+    _userProducts.clear();
+
+    await Future.delayed(const Duration(milliseconds: 250));
+    changeLoadingStatus();
 
     try {
       String? token = await isLoggedIn();
       if (token != null) {
-        products = await _productService.getAllProductsOfUser(id, token);
+        _userProducts
+            .addAll(await _productService.getAllProductsOfUser(id, token));
       }
     } on ApiError catch (e) {
-      print(e);
-      Fluttertoast.showToast(msg: "Error: ${e.message}");
+      Utils.showMessage('Error: ${e.message}');
     }
 
-    return products;
+    changeLoadingStatus();
+  }
+
+  Future<bool> editProduct(Product product) async {
+    changeLoadingStatus();
+    bool success = false;
+
+    try {
+      String? token = await isLoggedIn();
+      if (token != null) {
+        success = await _productService.editProduct(product, token);
+        if (success) {
+          Utils.showMessage('Product is successfully updated', false);
+        }
+      }
+    } on ApiError catch (e) {
+      Utils.showMessage('Error: ${e.message}');
+    }
+
+    changeLoadingStatus();
+    return success;
   }
 
   Future<bool> deleteProduct(String id) async {
@@ -170,10 +197,77 @@ class ProductProvider extends ProviderBase {
         success = await _productService.deleteProduct(id, token);
       }
     } on ApiError catch (e) {
-      print(e);
-      Fluttertoast.showToast(msg: "Error: ${e.message}");
+      Utils.showMessage('Error: ${e.message}');
     }
 
     return success;
+  }
+
+  Future<void> addOrRemoveProductToObserver(String id) async {
+    if (productObserver!.productList.contains(id)) {
+      productObserver!.productList.remove(id);
+    } else {
+      productObserver!.productList.add(id);
+    }
+
+    await updateProductObserver();
+
+    if (!isDisposed) notifyListeners();
+  }
+
+  Future<void> getProductObserver() async {
+    try {
+      String? token = await isLoggedIn();
+      if (token != null) {
+        productObserver = await _productService.getProductObserver(token);
+        if (productObserver == null) {
+          String? userId = await getCurrentUserId();
+          productObserver = await _productService.updateProductObserver(
+              ProductObserver(userId!), token);
+        }
+      }
+    } on ApiError catch (e) {
+      Utils.showMessage('Error: ${e.message}');
+    }
+  }
+
+  Future<ProductObserver?> updateProductObserver() async {
+    try {
+      String? token = await isLoggedIn();
+      if (token != null) {
+        print(productObserver);
+        return await _productService.updateProductObserver(
+            productObserver!, token);
+      }
+    } on ApiError catch (e) {
+      Utils.showMessage('Error: ${e.message}');
+    }
+    return null;
+  }
+
+  Future<void> getFilledProducts() async {
+    _filledProducts.clear();
+
+    for (String productId in productObserver?.productList ?? []) {
+      for (Product product in _products) {
+        if (product.id == productId) {
+          if (product.quantity != 0) {
+            _filledProducts.add(product);
+          }
+
+          break;
+        }
+      }
+    }
+
+    if (!isDisposed) notifyListeners();
+  }
+
+  Future<void> loadData() async {
+    await Future.delayed(const Duration(milliseconds: 750));
+
+    await getAllProducts();
+    await getProductObserver();
+    await getFilledProducts();
   }
 }

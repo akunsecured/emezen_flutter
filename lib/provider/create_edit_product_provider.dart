@@ -1,10 +1,9 @@
 import 'package:emezen/model/enums.dart';
 import 'package:emezen/model/product.dart';
 import 'package:file_picker/file_picker.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
-class AddProductProvider extends ChangeNotifier {
+class CreateEditProductProvider extends ChangeNotifier {
   bool _isDisposed = false;
 
   final String _sellerId;
@@ -14,7 +13,7 @@ class AddProductProvider extends ChangeNotifier {
       _detailsController,
       _quantityController;
 
-  AddProductProvider(this._sellerId) {
+  CreateEditProductProvider(this._sellerId) {
     _nameController = TextEditingController();
     _priceController = TextEditingController();
     _detailsController = TextEditingController();
@@ -36,6 +35,7 @@ class AddProductProvider extends ChangeNotifier {
   }
 
   List<PlatformFile> images = [];
+  List<String> imageUrls = [];
 
   Product getProduct() => Product(
     name: _nameController.text,

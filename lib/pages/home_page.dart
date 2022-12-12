@@ -5,10 +5,9 @@ import 'package:emezen/provider/cart_provider.dart';
 import 'package:emezen/provider/product_page_provider.dart';
 import 'package:emezen/provider/product_provider.dart';
 import 'package:emezen/widgets/product_card.dart';
-import 'package:emezen/widgets/search_bar.dart';
+import 'package:emezen/widgets/product_observer_widget.dart';
 import 'package:emezen/widgets/search_widget.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
 import 'package:provider/provider.dart';
 import 'package:responsive_grid/responsive_grid.dart';
 
@@ -20,19 +19,15 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  late final Future<void> _future;
-
   @override
   void initState() {
     super.initState();
 
-    _future = _getAllProducts();
+    _loadData();
   }
 
-  Future<void> _getAllProducts() async {
-    await Future.delayed(const Duration(milliseconds: 750));
-    await Provider.of<ProductProvider>(context, listen: false).getAllProducts();
-  }
+  Future<void> _loadData() async =>
+      Provider.of<ProductProvider>(context, listen: false).loadData();
 
   Future<void> _navigateToProductPage(Product product) async {
     AuthProvider authProvider =
@@ -55,13 +50,19 @@ class _HomePageState extends State<HomePage> {
               ],
               child: const ProductPage(),
             )));
-    if (result != null) await _getAllProducts();
+    if (result != null) await _loadData();
   }
 
   @override
   Widget build(BuildContext context) {
     return SingleChildScrollView(
         child: Column(crossAxisAlignment: CrossAxisAlignment.center, children: [
+      Consumer<ProductProvider>(
+        builder: (_, productProvider, __) =>
+            productProvider.filledProducts.isNotEmpty
+                ? ProductObserverWidget(productProvider.filledProducts)
+                : const SizedBox(),
+      ),
       Container(
           constraints: const BoxConstraints(maxWidth: 640),
           margin: const EdgeInsets.symmetric(vertical: 64.0, horizontal: 64.0),
@@ -69,47 +70,35 @@ class _HomePageState extends State<HomePage> {
               value: Provider.of<ProductProvider>(context, listen: false),
               child: const SearchWidget())),
       Consumer<CartProvider>(
-        builder: (context, cartProvider, child) => FutureBuilder(
-            future: _future,
-            builder: (context, AsyncSnapshot<void> snapshot) {
-              if (snapshot.hasError) {
-                return Center(child: Text(snapshot.error.toString()));
-              }
-
-              if (snapshot.connectionState == ConnectionState.done) {
-                return Selector<ProductProvider, bool>(
-                  selector: (_, productProvider) => productProvider.isLoading,
-                  builder: (_, bool isLoading, __) => isLoading
-                      ? const Center(child: CircularProgressIndicator())
-                      : Selector<ProductProvider, List<Product>>(
-                          selector: (_, productProvider) =>
-                              productProvider.products,
-                          builder: (_, List<Product> products, __) => products
-                                  .isEmpty
-                              ? const Center(
-                                  child:
-                                      Text('Currently there are no products'),
-                                )
-                              : ResponsiveGridRow(
-                                  crossAxisAlignment: CrossAxisAlignment.center,
-                                  children: products
-                                      .map((product) => ResponsiveGridCol(
-                                            xs: 6,
-                                            sm: 4,
-                                            md: 3,
-                                            child: ProductCard(
-                                              product: product,
-                                              onTap: _navigateToProductPage,
-                                            ),
-                                          ))
-                                      .toList(),
-                                ),
-                        ),
-                );
-              }
-              return const Center(child: CircularProgressIndicator());
-            }),
-      )
+          builder: (context, cartProvider, child) =>
+              Selector<ProductProvider, bool>(
+                selector: (_, productProvider) => productProvider.isLoading,
+                builder: (_, bool isLoading, __) => isLoading
+                    ? const Center(child: CircularProgressIndicator())
+                    : Selector<ProductProvider, List<Product>>(
+                        selector: (_, productProvider) =>
+                            productProvider.products,
+                        builder: (_, List<Product> products, __) => products
+                                .isEmpty
+                            ? const Center(
+                                child: Text('Currently there are no products'),
+                              )
+                            : ResponsiveGridRow(
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                children: products
+                                    .map((product) => ResponsiveGridCol(
+                                          xs: 6,
+                                          sm: 4,
+                                          md: 3,
+                                          child: ProductCard(
+                                            product: product,
+                                            onTap: _navigateToProductPage,
+                                          ),
+                                        ))
+                                    .toList(),
+                              ),
+                      ),
+              ))
     ]));
   }
 }
