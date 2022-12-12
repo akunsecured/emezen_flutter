@@ -56,6 +56,8 @@ class _EmezenAppState extends State<EmezenApp> {
     _cartProvider = CartProvider(_productService);
     _productProvider = ProductProvider(
         _productService, _authService, widget.sharedPreferences);
+
+    _authProvider.isLoggedIn();
   }
 
   @override
