@@ -199,8 +199,8 @@ class _ProductPageState extends State<ProductPage> {
                                                       .productObserver!
                                                       .productList
                                                       .contains(_product.id!)
-                                                  ? "Remove observer"
-                                                  : "Add observer")),
+                                                  ? "Remove from watchlist"
+                                                  : "Add to watchlist")),
                                     ),
                                   ],
                                 ))
@@ -306,8 +306,8 @@ class _ProductPageState extends State<ProductPage> {
                                                     .productObserver!
                                                     .productList
                                                     .contains(_product.id!)
-                                                ? "Remove observer"
-                                                : "Add observer")),
+                                                ? "Remove from watchlist"
+                                                : "Add to watchlist")),
                                   ),
                                 ],
                               ))
